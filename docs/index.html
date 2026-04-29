@@ -1,0 +1,1428 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WARZONE ARCADE — Mission Control</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E24B4A;
+    --red-dark: #A32D2D;
+    --amber: #EF9F27;
+    --amber-dark: #BA7517;
+    --green: #639922;
+    --green-dark: #3B6D11;
+    --blue: #378ADD;
+    --bg: #0a0b0d;
+    --bg2: #111318;
+    --bg3: #1a1d24;
+    --text: #e8e6de;
+    --text2: #9a9890;
+    --border: rgba(255,255,255,0.07);
+    --glow-red: rgba(226,75,74,0.3);
+    --glow-amber: rgba(239,159,39,0.3);
+    --glow-green: rgba(99,153,34,0.3);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CORNER MARKS */
+  .corner-mark {
+    position: fixed;
+    width: 24px;
+    height: 24px;
+    z-index: 100;
+    opacity: 0.4;
+  }
+  .corner-mark.tl { top: 12px; left: 12px; border-top: 2px solid var(--amber); border-left: 2px solid var(--amber); }
+  .corner-mark.tr { top: 12px; right: 12px; border-top: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+  .corner-mark.bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--amber); border-left: 2px solid var(--amber); }
+  .corner-mark.br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--amber); border-right: 2px solid var(--amber); }
+
+  /* PAGES */
+  .page { display: none; min-height: 100vh; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* ═══════════ LANDING PAGE ═══════════ */
+  #landing {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(239,159,39,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(239,159,39,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridPan 20s linear infinite;
+  }
+  @keyframes gridPan {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+
+  .radar-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 800px;
+    border-radius: 50%;
+    border: 1px solid rgba(239,159,39,0.05);
+    animation: radarPulse 4s ease-out infinite;
+  }
+  .radar-ring:nth-child(2) { animation-delay: 1.3s; }
+  .radar-ring:nth-child(3) { animation-delay: 2.6s; }
+  @keyframes radarPulse {
+    0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+  }
+
+  .landing-inner {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .alert-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(226,75,74,0.12);
+    border: 1px solid rgba(226,75,74,0.4);
+    color: var(--red);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    padding: 6px 14px;
+    margin-bottom: 2rem;
+    animation: blink 1.5s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.4; } }
+
+  .dot-blink {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: blink 0.8s step-end infinite;
+  }
+
+  .game-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 14vw, 140px);
+    letter-spacing: 0.04em;
+    line-height: 0.9;
+    color: var(--text);
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .game-title .accent { color: var(--amber); }
+
+  .game-title::after {
+    content: 'WARZONE ARCADE';
+    position: absolute;
+    inset: 0;
+    color: var(--red);
+    clip-path: polygon(0 45%, 100% 47%, 100% 52%, 0 50%);
+    opacity: 0.6;
+    transform: translateX(3px);
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: var(--text2);
+    margin-bottom: 3rem;
+  }
+
+  .stats-bar {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--amber);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  .stat-divider {
+    width: 1px;
+    background: var(--border);
+    align-self: stretch;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--amber);
+    color: #0a0b0d;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    padding: 14px 40px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  .btn-primary:hover {
+    background: #FADB9E;
+    transform: scale(1.02);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+
+  /* ═══════════ HOW IT WORKS PAGE ═══════════ */
+  #howto {
+    background: var(--bg);
+  }
+
+  .page-header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.15s;
+  }
+  .back-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+  }
+
+  .howto-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    flex: 1;
+  }
+
+  .section-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--amber);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .intro-text {
+    font-size: 18px;
+    color: var(--text2);
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    max-width: 680px;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 3rem;
+  }
+
+  .step-card {
+    background: var(--bg2);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    line-height: 1;
+    color: rgba(239,159,39,0.15);
+    position: absolute;
+    top: 8px;
+    right: 16px;
+    letter-spacing: 0;
+  }
+
+  .step-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  .step-desc {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .ball-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .ball-card {
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .ball-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .ball-circle.black {
+    background: #1a1a1a;
+    border: 2px solid var(--red);
+    box-shadow: 0 0 16px rgba(226,75,74,0.3);
+  }
+
+  .ball-circle.white {
+    background: #e8e6de;
+    border: 2px solid var(--blue);
+    box-shadow: 0 0 16px rgba(55,138,221,0.3);
+  }
+
+  .ball-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .ball-label.missile { color: var(--red); }
+  .ball-label.supply { color: var(--blue); }
+
+  .ball-desc { font-size: 14px; color: var(--text2); }
+
+  /* ═══════════ GAME PAGE ═══════════ */
+  #game {
+    background: var(--bg);
+  }
+
+  .game-hud {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hud-item {
+    display: flex;
+    flex-direction: column;
+  }
+  .hud-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+  }
+  .hud-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--amber);
+  }
+
+  .hud-divider { width: 1px; height: 40px; background: var(--border); }
+
+  .hud-bt {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .bt-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .bt-btn.connected {
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .bt-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text2);
+    transition: background 0.3s;
+  }
+
+  .bt-indicator.connected { background: var(--green); animation: blink 2s infinite; }
+
+  .game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  /* MISSION CARD */
+  .mission-card {
+    width: 100%;
+    max-width: 700px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mission-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--amber), var(--red));
+  }
+
+  .mission-header {
+    padding: 1.5rem 2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .mission-badge {
+    background: rgba(239,159,39,0.12);
+    border: 1px solid rgba(239,159,39,0.4);
+    color: var(--amber);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+  }
+
+  .mission-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--text2);
+    letter-spacing: 0.1em;
+  }
+
+  .mission-body { padding: 2rem; }
+
+  .mission-objective {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(24px, 4vw, 36px);
+    letter-spacing: 0.04em;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+    color: var(--text);
+  }
+
+  .objective-parts {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .obj-part {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .obj-ball {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .obj-ball.missile { background: #1a1a1a; border: 2px solid var(--red); }
+  .obj-ball.supply { background: #e8e6de; border: 2px solid var(--blue); }
+
+  .obj-count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+  }
+  .obj-count.missile { color: var(--red); }
+  .obj-count.supply { color: var(--blue); }
+
+  .obj-name {
+    font-size: 13px;
+    color: var(--text2);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* TIMER */
+  .timer-area {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .timer-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    letter-spacing: 0.04em;
+    line-height: 1;
+    color: var(--amber);
+    transition: color 0.3s;
+    min-width: 180px;
+  }
+
+  .timer-display.warning { color: var(--red); animation: timerPulse 0.5s ease-in-out infinite; }
+  @keyframes timerPulse { 50% { opacity: 0.5; } }
+
+  .timer-bar-wrap {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .timer-bar-bg {
+    height: 8px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timer-bar-fill {
+    height: 100%;
+    background: var(--amber);
+    transition: width 1s linear, background 0.3s;
+  }
+  .timer-bar-fill.warning { background: var(--red); }
+
+  /* SCORE DISPLAY */
+  .score-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+
+  .score-cell {
+    background: var(--bg3);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .score-cell-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+
+  .score-cell-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--text);
+  }
+
+  .score-cell-val.hit { color: var(--green); }
+  .score-cell-val.miss { color: var(--red); }
+  .score-cell-val.pts { color: var(--amber); }
+
+  /* GAME BUTTONS */
+  .game-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-start {
+    background: var(--green);
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    padding: 14px 36px;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+    min-width: 160px;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    transition: opacity 0.15s;
+  }
+  .btn-start:hover { opacity: 0.85; }
+
+  .btn-stop {
+    background: var(--red);
+    color: #fff;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    padding: 14px 36px;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+    min-width: 160px;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    transition: opacity 0.15s;
+    display: none;
+  }
+  .btn-stop:hover { opacity: 0.85; }
+
+  .btn-next {
+    background: var(--bg3);
+    color: var(--text2);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    padding: 14px 28px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { border-color: var(--amber); color: var(--amber); }
+
+  /* ═══════════ RESULT PAGE ═══════════ */
+  #result { background: var(--bg); }
+
+  .result-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .result-outcome {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(60px, 12vw, 120px);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .result-outcome.success { color: var(--green); }
+  .result-outcome.fail { color: var(--red); }
+
+  .result-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+    margin-bottom: 3rem;
+  }
+
+  .result-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .result-stat {
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .result-stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    line-height: 1;
+  }
+
+  .result-stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  /* FLASH OVERLAY */
+  .flash-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .flash-overlay.flash-green { background: rgba(99,153,34,0.2); animation: flashAnim 0.3s ease-out; }
+  .flash-overlay.flash-red { background: rgba(226,75,74,0.2); animation: flashAnim 0.3s ease-out; }
+  @keyframes flashAnim {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .stats-bar { gap: 1rem; }
+    .ball-legend { grid-template-columns: 1fr; }
+    .objective-parts { flex-direction: column; }
+    .game-hud { gap: 1rem; }
+  }
+
+  /* TICKER */
+  .ticker {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    padding: 6px 0;
+    overflow: hidden;
+    z-index: 50;
+  }
+  .ticker-inner {
+    display: flex;
+    gap: 4rem;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+  }
+  .ticker-item span { color: var(--amber); }
+
+  /* Point popup */
+  .point-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: var(--amber);
+    pointer-events: none;
+    z-index: 8000;
+    animation: popupAnim 0.8s ease-out forwards;
+    display: none;
+  }
+  @keyframes popupAnim {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+    100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="corner-mark tl"></div>
+<div class="corner-mark tr"></div>
+<div class="corner-mark bl"></div>
+<div class="corner-mark br"></div>
+
+<div class="flash-overlay" id="flashOverlay"></div>
+<div class="point-popup" id="pointPopup">+1</div>
+
+<!-- ═══ LANDING PAGE ═══ -->
+<div class="page active" id="landing">
+  <div class="grid-bg"></div>
+  <div class="radar-ring"></div>
+  <div class="radar-ring"></div>
+  <div class="radar-ring"></div>
+
+  <div class="landing-inner">
+    <div class="alert-tag">
+      <div class="dot-blink"></div>
+      MISSION CONTROL — SYSTEM ONLINE
+    </div>
+
+    <h1 class="game-title">WARZONE<br><span class="accent">ARCADE</span></h1>
+    <p class="subtitle">MECHATRONICS FINAL PROJECT — MISSION COMMAND SYSTEM</p>
+
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-num">30</div>
+        <div class="stat-label">SEC / MISSION</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num">6</div>
+        <div class="stat-label">RANDOM MISSIONS</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num">2</div>
+        <div class="stat-label">BALL TYPES</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">GLORY</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="showPage('game')">
+        ▶ START MISSION
+      </button>
+      <button class="btn-secondary" onclick="showPage('howto')">
+        HOW TO PLAY
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HOW IT WORKS PAGE ═══ -->
+<div class="page" id="howto">
+  <div class="page-header">
+    <button class="back-btn" onclick="showPage('landing')">← BACK</button>
+    <div class="page-title">HOW TO PLAY</div>
+  </div>
+
+  <div class="howto-content">
+    <div class="section-label">// BRIEFING</div>
+    <div class="section-title">YOUR MISSION,<br>COMMANDER</div>
+    <p class="intro-text">
+      You control the Warzone Arcade — a flywheel-powered launcher aimed at the target board.
+      Each mission gives you a specific number of missiles and supplies to deliver in 30 seconds.
+      Hit the sensors, rack up points, complete your objective. Simple. Brutal. Glorious.
+    </p>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <span class="step-icon">🎯</span>
+        <div class="step-title">AIM YOUR LAUNCHER</div>
+        <p class="step-desc">Use the joystick to rotate the flywheel shooter left and right. Line up your shot before firing.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <span class="step-icon">⚡</span>
+        <div class="step-title">FIRE THE BALL</div>
+        <p class="step-desc">Launch the ball using the flywheel mechanism. Hit the piezoelectric sensor targets on the board to score a point.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <span class="step-icon">🔄</span>
+        <div class="step-title">LIFT & SORT</div>
+        <p class="step-desc">The ball travels up the Archimedes screw lift (~30cm), then rolls down a slide into the automatic ball sorter.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <span class="step-icon">✅</span>
+        <div class="step-title">COMPLETE THE MISSION</div>
+        <p class="step-desc">Hit enough missiles (black balls) and supplies (white balls) before the 30-second timer runs out!</p>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom: 1rem;">// BALL TYPES</div>
+    <div class="ball-legend">
+      <div class="ball-card">
+        <div class="ball-circle black"></div>
+        <div>
+          <div class="ball-label missile">MISSILE</div>
+          <div class="ball-desc">Black ball — delivers a strike on enemy territory. High risk, high reward.</div>
+        </div>
+      </div>
+      <div class="ball-card">
+        <div class="ball-circle white"></div>
+        <div>
+          <div class="ball-label supply">SUPPLY</div>
+          <div class="ball-desc">White ball — sends support to your allies. Keep them in the fight.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem;">
+      <button class="btn-primary" onclick="showPage('game')">▶ START MISSION</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GAME PAGE ═══ -->
+<div class="page" id="game">
+  <div class="game-hud">
+    <button class="back-btn" onclick="showPage('landing'); resetGame()">← EXIT</button>
+    <div class="hud-divider"></div>
+    <div class="hud-item">
+      <div class="hud-label">SCORE</div>
+      <div class="hud-value" id="hudScore">0</div>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-item">
+      <div class="hud-label">MISSION</div>
+      <div class="hud-value" id="hudMission">1 / 6</div>
+    </div>
+    <div class="hud-divider"></div>
+    <div class="hud-item">
+      <div class="hud-label">STATUS</div>
+      <div class="hud-value" id="hudStatus" style="color: var(--text2); font-size: 18px;">STANDBY</div>
+    </div>
+    <div class="hud-bt">
+      <button class="bt-btn" id="btBtn" onclick="connectBluetooth()">
+        <div class="bt-indicator" id="btIndicator"></div>
+        <span id="btLabel">BT CONNECT</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="game-main">
+    <div class="mission-card">
+      <div class="mission-header">
+        <div class="mission-badge">INCOMING ORDERS</div>
+        <div class="mission-num" id="missionNum">MISSION 1 OF 6</div>
+      </div>
+      <div class="mission-body">
+        <div class="mission-objective" id="missionObjective">
+          AWAITING MISSION BRIEFING...
+        </div>
+
+        <div class="objective-parts" id="objectiveParts">
+          <div class="obj-part" id="missileObj">
+            <div class="obj-ball missile"></div>
+            <div>
+              <div class="obj-count missile" id="missileCount">0</div>
+              <div class="obj-name">Missiles</div>
+            </div>
+          </div>
+          <div class="obj-part" id="supplyObj">
+            <div class="obj-ball supply"></div>
+            <div>
+              <div class="obj-count supply" id="supplyCount">0</div>
+              <div class="obj-name">Supplies</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="timer-area">
+          <div class="timer-display" id="timerDisplay">00:30</div>
+          <div class="timer-bar-wrap">
+            <div class="timer-bar-bg">
+              <div class="timer-bar-fill" id="timerBar" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="score-row">
+          <div class="score-cell">
+            <div class="score-cell-label">MISSILES HIT</div>
+            <div class="score-cell-val hit" id="missileHit">0</div>
+          </div>
+          <div class="score-cell">
+            <div class="score-cell-label">SUPPLIES SENT</div>
+            <div class="score-cell-val hit" id="supplyHit">0</div>
+          </div>
+          <div class="score-cell">
+            <div class="score-cell-label">TOTAL POINTS</div>
+            <div class="score-cell-val pts" id="totalPts">0</div>
+          </div>
+        </div>
+
+        <div class="game-actions">
+          <button class="btn-start" id="btnStart" onclick="startMission()">▶ BEGIN MISSION</button>
+          <button class="btn-stop" id="btnStop" onclick="endMission(false)">■ ABORT</button>
+          <button class="btn-next" id="btnNext" onclick="nextMission()" style="display: none;">NEXT MISSION →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULT PAGE ═══ -->
+<div class="page" id="result">
+  <div class="page-header">
+    <div class="page-title">MISSION DEBRIEF</div>
+  </div>
+
+  <div class="result-main">
+    <div class="result-outcome" id="resultOutcome">MISSION COMPLETE</div>
+    <div class="result-sub" id="resultSub">ALL OBJECTIVES ACHIEVED — WELL DONE, COMMANDER</div>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-num" id="resMissiles" style="color: var(--red);">0</div>
+        <div class="result-stat-label">MISSILES</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-num" id="resSupplies" style="color: var(--blue);">0</div>
+        <div class="result-stat-label">SUPPLIES</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-num" id="resTotal" style="color: var(--amber);">0</div>
+        <div class="result-stat-label">TOTAL SCORE</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="showPage('game'); nextMission()" id="resBtnNext">NEXT MISSION →</button>
+      <button class="btn-secondary" onclick="showPage('landing'); resetGame()">← MAIN MENU</button>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">WARZONE ARCADE <span>// MECHATRONICS FINAL PROJECT</span></div>
+    <div class="ticker-item">FLYWHEEL LAUNCHER ACTIVE <span>// PIEZO SENSORS ARMED</span></div>
+    <div class="ticker-item">ARCHIMEDES SCREW LIFT <span>// 30cm VERTICAL ASCENT</span></div>
+    <div class="ticker-item">BALL SORTER <span>// MISSILE / SUPPLY CLASSIFICATION</span></div>
+    <div class="ticker-item">BLUETOOTH MODULE <span>// SIGNAL ACTIVE</span></div>
+    <div class="ticker-item">ARDUINO JOYSTICK <span>// DIRECTIONAL CONTROL ENABLED</span></div>
+    <!-- repeat for seamless loop -->
+    <div class="ticker-item">WARZONE ARCADE <span>// MECHATRONICS FINAL PROJECT</span></div>
+    <div class="ticker-item">FLYWHEEL LAUNCHER ACTIVE <span>// PIEZO SENSORS ARMED</span></div>
+    <div class="ticker-item">ARCHIMEDES SCREW LIFT <span>// 30cm VERTICAL ASCENT</span></div>
+    <div class="ticker-item">BALL SORTER <span>// MISSILE / SUPPLY CLASSIFICATION</span></div>
+    <div class="ticker-item">BLUETOOTH MODULE <span>// SIGNAL ACTIVE</span></div>
+    <div class="ticker-item">ARDUINO JOYSTICK <span>// DIRECTIONAL CONTROL ENABLED</span></div>
+  </div>
+</div>
+
+<script>
+  // ══════════ MISSIONS DATA ══════════
+  const MISSION_POOL = [
+    { title: "STRIKE PROTOCOL ALPHA", missiles: 5, supplies: 3 },
+    { title: "ALLIED RESUPPLY RUN", missiles: 2, supplies: 6 },
+    { title: "FULL ASSAULT MODE", missiles: 7, supplies: 1 },
+    { title: "BALANCED OFFENSIVE", missiles: 4, supplies: 4 },
+    { title: "MERCY MISSION", missiles: 1, supplies: 8 },
+    { title: "RAPID FIRE BLITZ", missiles: 6, supplies: 2 },
+    { title: "SURGICAL STRIKE", missiles: 3, supplies: 5 },
+    { title: "OVERWHELMING FORCE", missiles: 8, supplies: 0 },
+    { title: "PEACEKEEPING OP", missiles: 0, supplies: 7 },
+    { title: "DOUBLE DOWN", missiles: 5, supplies: 5 },
+  ];
+
+  const MISSION_DURATION = 30;
+
+  let state = {
+    missions: [],
+    currentMission: 0,
+    totalMissions: 6,
+    timer: null,
+    timeLeft: MISSION_DURATION,
+    running: false,
+    missileHit: 0,
+    supplyHit: 0,
+    totalScore: 0,
+    allMissileHit: 0,
+    allSupplyHit: 0,
+    allScore: 0,
+    btDevice: null,
+    btChar: null,
+    btConnected: false,
+  };
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function initMissions() {
+    state.missions = shuffle(MISSION_POOL).slice(0, state.totalMissions);
+    state.currentMission = 0;
+    state.allMissileHit = 0;
+    state.allSupplyHit = 0;
+    state.allScore = 0;
+  }
+
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function resetGame() {
+    clearInterval(state.timer);
+    state.running = false;
+    state.timeLeft = MISSION_DURATION;
+    state.missileHit = 0;
+    state.supplyHit = 0;
+    state.totalScore = 0;
+    updateTimerDisplay(MISSION_DURATION);
+    document.getElementById('btnStart').style.display = '';
+    document.getElementById('btnStop').style.display = 'none';
+    document.getElementById('btnNext').style.display = 'none';
+    initMissions();
+    loadMission(0);
+  }
+
+  function loadMission(idx) {
+    if (idx >= state.missions.length) {
+      showFinalResult();
+      return;
+    }
+    const m = state.missions[idx];
+    state.missileHit = 0;
+    state.supplyHit = 0;
+    state.totalScore = 0;
+    state.timeLeft = MISSION_DURATION;
+
+    document.getElementById('missionNum').textContent = `MISSION ${idx + 1} OF ${state.totalMissions}`;
+    document.getElementById('hudMission').textContent = `${idx + 1} / ${state.totalMissions}`;
+    document.getElementById('missionObjective').textContent = m.title;
+    document.getElementById('missileCount').textContent = m.missiles;
+    document.getElementById('supplyCount').textContent = m.supplies;
+    document.getElementById('missileHit').textContent = 0;
+    document.getElementById('supplyHit').textContent = 0;
+    document.getElementById('totalPts').textContent = 0;
+    document.getElementById('hudScore').textContent = state.allScore;
+    document.getElementById('hudStatus').textContent = 'STANDBY';
+    document.getElementById('hudStatus').style.color = 'var(--text2)';
+
+    updateTimerDisplay(MISSION_DURATION);
+    document.getElementById('timerBar').style.width = '100%';
+    document.getElementById('timerBar').classList.remove('warning');
+    document.getElementById('timerDisplay').classList.remove('warning');
+
+    document.getElementById('btnStart').style.display = '';
+    document.getElementById('btnStop').style.display = 'none';
+    document.getElementById('btnNext').style.display = 'none';
+
+    // Show/hide mission parts
+    document.getElementById('missileObj').style.display = m.missiles > 0 ? '' : 'none';
+    document.getElementById('supplyObj').style.display = m.supplies > 0 ? '' : 'none';
+  }
+
+  function updateTimerDisplay(sec) {
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+  }
+
+  function startMission() {
+    if (state.running) return;
+    state.running = true;
+    state.timeLeft = MISSION_DURATION;
+
+    document.getElementById('btnStart').style.display = 'none';
+    document.getElementById('btnStop').style.display = '';
+    document.getElementById('hudStatus').textContent = 'ACTIVE';
+    document.getElementById('hudStatus').style.color = 'var(--green)';
+
+    state.timer = setInterval(() => {
+      state.timeLeft--;
+      updateTimerDisplay(state.timeLeft);
+
+      const pct = (state.timeLeft / MISSION_DURATION) * 100;
+      document.getElementById('timerBar').style.width = pct + '%';
+
+      if (state.timeLeft <= 10) {
+        document.getElementById('timerBar').classList.add('warning');
+        document.getElementById('timerDisplay').classList.add('warning');
+      }
+
+      if (state.timeLeft <= 0) {
+        endMission(true);
+      }
+    }, 1000);
+  }
+
+  function endMission(timeUp) {
+    if (!state.running && !timeUp) return;
+    clearInterval(state.timer);
+    state.running = false;
+
+    const m = state.missions[state.currentMission];
+    const missileGoal = m.missiles;
+    const supplyGoal = m.supplies;
+    const success = state.missileHit >= missileGoal && state.supplyHit >= supplyGoal;
+
+    state.allMissileHit += state.missileHit;
+    state.allSupplyHit += state.supplyHit;
+    state.allScore += state.totalScore;
+
+    document.getElementById('hudStatus').textContent = success ? 'SUCCESS' : 'FAILED';
+    document.getElementById('hudStatus').style.color = success ? 'var(--green)' : 'var(--red)';
+    document.getElementById('btnStop').style.display = 'none';
+
+    const isLast = state.currentMission >= state.totalMissions - 1;
+    if (isLast) {
+      document.getElementById('btnNext').textContent = 'VIEW RESULTS →';
+    } else {
+      document.getElementById('btnNext').textContent = 'NEXT MISSION →';
+    }
+    document.getElementById('btnNext').style.display = '';
+
+    flash(success ? 'green' : 'red');
+  }
+
+  function nextMission() {
+    const isLast = state.currentMission >= state.totalMissions - 1;
+    if (isLast) {
+      showFinalResult();
+      return;
+    }
+    state.currentMission++;
+    loadMission(state.currentMission);
+  }
+
+  function showFinalResult() {
+    showPage('result');
+    const successRate = state.allScore > state.allMissileHit + state.allSupplyHit;
+
+    document.getElementById('resultOutcome').textContent = 'CAMPAIGN COMPLETE';
+    document.getElementById('resultOutcome').className = 'result-outcome success';
+    document.getElementById('resultSub').textContent = 'ALL MISSIONS COMPLETED — DEBRIEF IN PROGRESS';
+    document.getElementById('resMissiles').textContent = state.allMissileHit;
+    document.getElementById('resSupplies').textContent = state.allSupplyHit;
+    document.getElementById('resTotal').textContent = state.allScore;
+    document.getElementById('resBtnNext').style.display = 'none';
+  }
+
+  // Score update called when Bluetooth sends hit
+  function registerHit(type) {
+    if (!state.running) return;
+    const m = state.missions[state.currentMission];
+
+    if (type === 'missile') {
+      state.missileHit++;
+      document.getElementById('missileHit').textContent = state.missileHit;
+    } else {
+      state.supplyHit++;
+      document.getElementById('supplyHit').textContent = state.supplyHit;
+    }
+
+    state.totalScore++;
+    document.getElementById('totalPts').textContent = state.totalScore;
+    document.getElementById('hudScore').textContent = state.allScore + state.totalScore;
+
+    showPointPopup();
+
+    // Auto-complete if all objectives met
+    if (state.missileHit >= m.missiles && state.supplyHit >= m.supplies) {
+      endMission(false);
+    }
+  }
+
+  function showPointPopup() {
+    const el = document.getElementById('pointPopup');
+    el.style.display = 'block';
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = 'popupAnim 0.8s ease-out forwards';
+    setTimeout(() => { el.style.display = 'none'; }, 800);
+  }
+
+  function flash(color) {
+    const el = document.getElementById('flashOverlay');
+    el.className = `flash-overlay flash-${color}`;
+    setTimeout(() => { el.className = 'flash-overlay'; }, 350);
+  }
+
+  // ══════════ BLUETOOTH ══════════
+  async function connectBluetooth() {
+    if (state.btConnected) {
+      disconnectBluetooth();
+      return;
+    }
+
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
+      });
+
+      state.btDevice = device;
+      device.addEventListener('gattserverdisconnected', onBTDisconnected);
+
+      const server = await device.gatt.connect();
+      const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+      const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+
+      state.btChar = characteristic;
+      await characteristic.startNotifications();
+      characteristic.addEventListener('characteristicvaluechanged', onBTData);
+
+      state.btConnected = true;
+      updateBTUI(true);
+    } catch (err) {
+      console.log('BT error:', err);
+      if (err.name !== 'NotFoundError') {
+        alert('Bluetooth connection failed: ' + err.message);
+      }
+    }
+  }
+
+  function onBTData(event) {
+    const value = new TextDecoder().decode(event.target.value).trim();
+    if (value === 'M' || value === '1') registerHit('missile');
+    else if (value === 'S' || value === '2') registerHit('supply');
+  }
+
+  function onBTDisconnected() {
+    state.btConnected = false;
+    updateBTUI(false);
+  }
+
+  function disconnectBluetooth() {
+    if (state.btDevice && state.btDevice.gatt.connected) {
+      state.btDevice.gatt.disconnect();
+    }
+    state.btConnected = false;
+    updateBTUI(false);
+  }
+
+  function updateBTUI(connected) {
+    const btn = document.getElementById('btBtn');
+    const ind = document.getElementById('btIndicator');
+    const lbl = document.getElementById('btLabel');
+    if (connected) {
+      btn.classList.add('connected');
+      ind.classList.add('connected');
+      lbl.textContent = 'BT CONNECTED';
+    } else {
+      btn.classList.remove('connected');
+      ind.classList.remove('connected');
+      lbl.textContent = 'BT CONNECT';
+    }
+  }
+
+  // Keyboard shortcut for demo mode (M = missile hit, S = supply hit)
+  document.addEventListener('keydown', e => {
+    if (e.key === 'm' || e.key === 'M') registerHit('missile');
+    if (e.key === 's' || e.key === 'S') registerHit('supply');
+  });
+
+  // ══════════ INIT ══════════
+  initMissions();
+  loadMission(0);
+</script>
+</body>
+</html>
