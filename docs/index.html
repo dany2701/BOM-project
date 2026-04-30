@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
   :root {
     --red: #E24B4A;
     --red-dark: #A32D2D;
@@ -27,9 +26,9 @@
     --glow-amber: rgba(239,159,39,0.3);
     --glow-green: rgba(99,153,34,0.3);
   }
-
+ 
   html { scroll-behavior: smooth; }
-
+ 
   body {
     background: var(--bg);
     color: var(--text);
@@ -39,7 +38,7 @@
     min-height: 100vh;
     overflow-x: hidden;
   }
-
+ 
   /* SCANLINE OVERLAY */
   body::before {
     content: '';
@@ -49,7 +48,15 @@
     pointer-events: none;
     z-index: 9999;
   }
-
+ 
+  /* ═══ EMBER CANVAS ═══ */
+  #emberCanvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9998;
+  }
+ 
   /* CORNER MARKS */
   .corner-mark {
     position: fixed;
@@ -62,17 +69,14 @@
   .corner-mark.tr { top: 12px; right: 12px; border-top: 2px solid var(--amber); border-right: 2px solid var(--amber); }
   .corner-mark.bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--amber); border-left: 2px solid var(--amber); }
   .corner-mark.br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--amber); border-right: 2px solid var(--amber); }
-
+ 
   /* PAGES */
   .page { display: none; min-height: 100vh; }
   .page.active { display: flex; flex-direction: column; }
-
+ 
   /* ═══════════ LANDING PAGE ═══════════ */
-  #landing {
-    position: relative;
-    overflow: hidden;
-  }
-
+  #landing { position: relative; overflow: hidden; }
+ 
   .grid-bg {
     position: absolute;
     inset: 0;
@@ -82,18 +86,13 @@
     background-size: 60px 60px;
     animation: gridPan 20s linear infinite;
   }
-  @keyframes gridPan {
-    from { transform: translateY(0); }
-    to { transform: translateY(60px); }
-  }
-
+  @keyframes gridPan { from { transform: translateY(0); } to { transform: translateY(60px); } }
+ 
   .radar-ring {
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 800px;
-    height: 800px;
+    width: 800px; height: 800px;
     border-radius: 50%;
     border: 1px solid rgba(239,159,39,0.05);
     animation: radarPulse 4s ease-out infinite;
@@ -104,7 +103,7 @@
     0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0.5; }
     100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
   }
-
+ 
   .landing-inner {
     position: relative;
     z-index: 10;
@@ -116,7 +115,7 @@
     padding: 2rem;
     text-align: center;
   }
-
+ 
   .alert-tag {
     display: inline-flex;
     align-items: center;
@@ -132,15 +131,14 @@
     animation: blink 1.5s step-end infinite;
   }
   @keyframes blink { 50% { opacity: 0.4; } }
-
+ 
   .dot-blink {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--red);
     animation: blink 0.8s step-end infinite;
   }
-
+ 
   .game-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(64px, 14vw, 140px);
@@ -150,643 +148,476 @@
     position: relative;
     margin-bottom: 0.5rem;
   }
-
   .game-title .accent { color: var(--amber); }
-
   .game-title::after {
     content: 'WARZONE ARCADE';
-    position: absolute;
-    inset: 0;
+    position: absolute; inset: 0;
     color: var(--red);
     clip-path: polygon(0 45%, 100% 47%, 100% 52%, 0 50%);
     opacity: 0.6;
     transform: translateX(3px);
   }
-
+ 
   .subtitle {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    color: var(--text2);
-    margin-bottom: 3rem;
+    font-size: 13px; letter-spacing: 0.2em;
+    color: var(--text2); margin-bottom: 3rem;
   }
-
-  .stats-bar {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .stat-item {
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    color: var(--amber);
-    line-height: 1;
-  }
-  .stat-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--text2);
-    margin-top: 4px;
-  }
-
-  .stat-divider {
-    width: 1px;
-    background: var(--border);
-    align-self: stretch;
-  }
-
+ 
+  .stats-bar { display: flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; justify-content: center; }
+  .stat-item { text-align: center; }
+  .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--amber); line-height: 1; }
+  .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text2); margin-top: 4px; }
+  .stat-divider { width: 1px; background: var(--border); align-self: stretch; }
+ 
   .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--amber);
-    color: #0a0b0d;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.1em;
-    padding: 14px 40px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--amber); color: #0a0b0d;
+    font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    letter-spacing: 0.1em; padding: 14px 40px;
+    border: none; cursor: pointer; transition: all 0.15s;
     clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   }
-  .btn-primary:hover {
-    background: #FADB9E;
-    transform: scale(1.02);
-  }
-
+  .btn-primary:hover { background: #FADB9E; transform: scale(1.02); }
+ 
   .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: transparent;
-    color: var(--text2);
-    font-family: 'Barlow Condensed', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.1em;
-    padding: 10px 20px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.15s;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: var(--text2);
+    font-family: 'Barlow Condensed', sans-serif; font-weight: 600;
+    font-size: 14px; letter-spacing: 0.1em; padding: 10px 20px;
+    border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
     text-transform: uppercase;
   }
   .btn-secondary:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-
+ 
   .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
-
+ 
   /* ═══════════ HOW IT WORKS PAGE ═══════════ */
-  #howto {
-    background: var(--bg);
-  }
-
+  #howto { background: var(--bg); }
+ 
   .page-header {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 1.5rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem;
   }
-
   .back-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text2);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 12px;
-    padding: 6px 12px;
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    transition: all 0.15s;
+    background: none; border: 1px solid var(--border); color: var(--text2);
+    font-family: 'Share Tech Mono', monospace; font-size: 12px;
+    padding: 6px 12px; cursor: pointer; letter-spacing: 0.1em; transition: all 0.15s;
   }
   .back-btn:hover { border-color: var(--amber); color: var(--amber); }
-
-  .page-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 0.08em;
-    color: var(--amber);
-  }
-
-  .howto-content {
-    max-width: 900px;
-    margin: 0 auto;
-    padding: 3rem 2rem;
-    flex: 1;
-  }
-
-  .section-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    color: var(--amber);
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 0.05em;
-    line-height: 1;
-    margin-bottom: 1rem;
-  }
-
-  .intro-text {
-    font-size: 18px;
-    color: var(--text2);
-    line-height: 1.7;
-    margin-bottom: 3rem;
-    max-width: 680px;
-  }
-
-  .steps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-bottom: 3rem;
-  }
-
-  .step-card {
-    background: var(--bg2);
-    padding: 1.5rem;
-    position: relative;
-  }
-
-  .step-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px;
-    line-height: 1;
-    color: rgba(239,159,39,0.15);
-    position: absolute;
-    top: 8px;
-    right: 16px;
-    letter-spacing: 0;
-  }
-
-  .step-icon {
-    font-size: 28px;
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .step-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 0.05em;
-    color: var(--amber);
-    margin-bottom: 8px;
-  }
-
-  .step-desc {
-    font-size: 15px;
-    color: var(--text2);
-    line-height: 1.5;
-  }
-
-  .ball-legend {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 3rem;
-  }
-
-  .ball-card {
-    border: 1px solid var(--border);
-    background: var(--bg2);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .ball-circle {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .ball-circle.black {
-    background: #1a1a1a;
-    border: 2px solid var(--red);
-    box-shadow: 0 0 16px rgba(226,75,74,0.3);
-  }
-
-  .ball-circle.white {
-    background: #e8e6de;
-    border: 2px solid var(--blue);
-    box-shadow: 0 0 16px rgba(55,138,221,0.3);
-  }
-
-  .ball-label {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 20px;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-  }
+  .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.08em; color: var(--amber); }
+ 
+  .howto-content { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; flex: 1; }
+  .section-label { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.2em; color: var(--amber); margin-bottom: 1rem; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.05em; line-height: 1; margin-bottom: 1rem; }
+  .intro-text { font-size: 18px; color: var(--text2); line-height: 1.7; margin-bottom: 3rem; max-width: 680px; }
+ 
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 3rem; }
+  .step-card { background: var(--bg2); padding: 1.5rem; position: relative; }
+  .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 64px; line-height: 1; color: rgba(239,159,39,0.15); position: absolute; top: 8px; right: 16px; letter-spacing: 0; }
+  .step-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+  .step-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.05em; color: var(--amber); margin-bottom: 8px; }
+  .step-desc { font-size: 15px; color: var(--text2); line-height: 1.5; }
+ 
+  .ball-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 3rem; }
+  .ball-card { border: 1px solid var(--border); background: var(--bg2); padding: 1.5rem; display: flex; align-items: center; gap: 1rem; }
+  .ball-circle { width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0; }
+  .ball-circle.black { background: #1a1a1a; border: 2px solid var(--red); box-shadow: 0 0 16px rgba(226,75,74,0.3); }
+  .ball-circle.white { background: #e8e6de; border: 2px solid var(--blue); box-shadow: 0 0 16px rgba(55,138,221,0.3); }
+  .ball-label { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 0.05em; margin-bottom: 4px; }
   .ball-label.missile { color: var(--red); }
   .ball-label.supply { color: var(--blue); }
-
   .ball-desc { font-size: 14px; color: var(--text2); }
-
+ 
   /* ═══════════ GAME PAGE ═══════════ */
-  #game {
-    background: var(--bg);
-  }
-
+  #game { background: var(--bg); }
+ 
   .game-hud {
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-    padding: 1rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 1rem 2rem; display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
   }
-
-  .hud-item {
-    display: flex;
-    flex-direction: column;
-  }
-  .hud-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--text2);
-  }
-  .hud-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    line-height: 1;
-    color: var(--amber);
-  }
-
+  .hud-item { display: flex; flex-direction: column; }
+  .hud-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text2); }
+  .hud-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; line-height: 1; color: var(--amber); }
   .hud-divider { width: 1px; height: 40px; background: var(--border); }
-
-  .hud-bt {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
+  .hud-bt { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+ 
+  /* ═══ IMPROVED BLUETOOTH BUTTON ═══ */
   .bt-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: 8px;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--text2);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    padding: 6px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
+    font-size: 11px; letter-spacing: 0.1em;
+    padding: 8px 14px; cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    min-width: 160px;
+    justify-content: center;
   }
-
+  .bt-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .bt-btn.scanning {
+    border-color: var(--amber);
+    color: var(--amber);
+    animation: scanPulse 1s ease-in-out infinite;
+  }
   .bt-btn.connected {
     border-color: var(--green);
     color: var(--green);
+    background: rgba(99,153,34,0.08);
   }
-
+  .bt-btn.error {
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(226,75,74,0.08);
+  }
+  @keyframes scanPulse { 50% { opacity: 0.5; } }
+ 
+  .bt-icon {
+    font-size: 14px;
+    transition: all 0.3s;
+  }
+ 
   .bt-indicator {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     border-radius: 50%;
     background: var(--text2);
-    transition: background 0.3s;
-  }
-
-  .bt-indicator.connected { background: var(--green); animation: blink 2s infinite; }
-
-  .game-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-  }
-
-  /* MISSION CARD */
-  .mission-card {
-    width: 100%;
-    max-width: 700px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .mission-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--amber), var(--red));
-  }
-
-  .mission-header {
-    padding: 1.5rem 2rem 1rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .mission-badge {
-    background: rgba(239,159,39,0.12);
-    border: 1px solid rgba(239,159,39,0.4);
-    color: var(--amber);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    padding: 4px 10px;
-  }
-
-  .mission-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    color: var(--text2);
-    letter-spacing: 0.1em;
-  }
-
-  .mission-body { padding: 2rem; }
-
-  .mission-objective {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(24px, 4vw, 36px);
-    letter-spacing: 0.04em;
-    line-height: 1.15;
-    margin-bottom: 2rem;
-    color: var(--text);
-  }
-
-  .objective-parts {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .obj-part {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 1rem 1.5rem;
-    flex: 1;
-    min-width: 140px;
-  }
-
-  .obj-ball {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    transition: background 0.3s, box-shadow 0.3s;
     flex-shrink: 0;
   }
+  .bt-indicator.connected {
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 2s infinite;
+  }
+  .bt-indicator.scanning {
+    background: var(--amber);
+    box-shadow: 0 0 8px var(--amber);
+    animation: blink 0.5s infinite;
+  }
+  .bt-indicator.error {
+    background: var(--red);
+    box-shadow: 0 0 8px var(--red);
+  }
+ 
+  /* BT Status bar below HUD */
+  .bt-status-bar {
+    background: rgba(99,153,34,0.1);
+    border-bottom: 1px solid rgba(99,153,34,0.3);
+    padding: 6px 2rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .bt-status-bar.show { display: flex; }
+  .bt-status-bar.error { background: rgba(226,75,74,0.1); border-bottom-color: rgba(226,75,74,0.3); color: var(--red); }
+  .bt-status-bar.scanning { background: rgba(239,159,39,0.1); border-bottom-color: rgba(239,159,39,0.3); color: var(--amber); }
+ 
+  .game-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+ 
+  /* MISSION CARD */
+  .mission-card { width: 100%; max-width: 700px; background: var(--bg2); border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .mission-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--amber), var(--red)); }
+  .mission-header { padding: 1.5rem 2rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+  .mission-badge { background: rgba(239,159,39,0.12); border: 1px solid rgba(239,159,39,0.4); color: var(--amber); font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; padding: 4px 10px; }
+  .mission-num { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--text2); letter-spacing: 0.1em; }
+  .mission-body { padding: 2rem; }
+  .mission-objective { font-family: 'Bebas Neue', sans-serif; font-size: clamp(24px, 4vw, 36px); letter-spacing: 0.04em; line-height: 1.15; margin-bottom: 2rem; color: var(--text); }
+ 
+  .objective-parts { display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .obj-part { display: flex; align-items: center; gap: 10px; background: var(--bg3); border: 1px solid var(--border); padding: 1rem 1.5rem; flex: 1; min-width: 140px; }
+  .obj-ball { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; }
   .obj-ball.missile { background: #1a1a1a; border: 2px solid var(--red); }
   .obj-ball.supply { background: #e8e6de; border: 2px solid var(--blue); }
-
-  .obj-count {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    line-height: 1;
-  }
+  .obj-count { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; }
   .obj-count.missile { color: var(--red); }
   .obj-count.supply { color: var(--blue); }
-
-  .obj-name {
-    font-size: 13px;
-    color: var(--text2);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  /* TIMER */
-  .timer-area {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-  }
-
-  .timer-display {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    letter-spacing: 0.04em;
-    line-height: 1;
-    color: var(--amber);
-    transition: color 0.3s;
-    min-width: 180px;
-  }
-
+  .obj-name { font-size: 13px; color: var(--text2); font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+ 
+  .timer-area { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+  .timer-display { font-family: 'Bebas Neue', sans-serif; font-size: 72px; letter-spacing: 0.04em; line-height: 1; color: var(--amber); transition: color 0.3s; min-width: 180px; }
   .timer-display.warning { color: var(--red); animation: timerPulse 0.5s ease-in-out infinite; }
   @keyframes timerPulse { 50% { opacity: 0.5; } }
-
-  .timer-bar-wrap {
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .timer-bar-bg {
-    height: 8px;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .timer-bar-fill {
-    height: 100%;
-    background: var(--amber);
-    transition: width 1s linear, background 0.3s;
-  }
+ 
+  .timer-bar-wrap { flex: 1; min-width: 200px; }
+  .timer-bar-bg { height: 8px; background: var(--bg3); border: 1px solid var(--border); position: relative; overflow: hidden; }
+  .timer-bar-fill { height: 100%; background: var(--amber); transition: width 1s linear, background 0.3s; }
   .timer-bar-fill.warning { background: var(--red); }
-
-  /* SCORE DISPLAY */
-  .score-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-bottom: 2rem;
-  }
-
-  .score-cell {
-    background: var(--bg3);
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .score-cell-label {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    color: var(--text2);
-    margin-bottom: 6px;
-  }
-
-  .score-cell-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 36px;
-    line-height: 1;
-    color: var(--text);
-  }
-
+ 
+  .score-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 2rem; }
+  .score-cell { background: var(--bg3); padding: 1rem; text-align: center; }
+  .score-cell-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: var(--text2); margin-bottom: 6px; }
+  .score-cell-val { font-family: 'Bebas Neue', sans-serif; font-size: 36px; line-height: 1; color: var(--text); }
   .score-cell-val.hit { color: var(--green); }
   .score-cell-val.miss { color: var(--red); }
   .score-cell-val.pts { color: var(--amber); }
-
-  /* GAME BUTTONS */
-  .game-actions {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
+ 
+  .game-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+ 
   .btn-start {
-    background: var(--green);
-    color: #fff;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.1em;
-    padding: 14px 36px;
-    border: none;
-    cursor: pointer;
-    flex: 1;
-    min-width: 160px;
+    background: var(--green); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    letter-spacing: 0.1em; padding: 14px 36px; border: none; cursor: pointer; flex: 1; min-width: 160px;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
     transition: opacity 0.15s;
   }
   .btn-start:hover { opacity: 0.85; }
-
   .btn-stop {
-    background: var(--red);
-    color: #fff;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.1em;
-    padding: 14px 36px;
-    border: none;
-    cursor: pointer;
-    flex: 1;
-    min-width: 160px;
+    background: var(--red); color: #fff; font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    letter-spacing: 0.1em; padding: 14px 36px; border: none; cursor: pointer; flex: 1; min-width: 160px;
     clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-    transition: opacity 0.15s;
-    display: none;
+    transition: opacity 0.15s; display: none;
   }
   .btn-stop:hover { opacity: 0.85; }
-
   .btn-next {
-    background: var(--bg3);
-    color: var(--text2);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.1em;
-    padding: 14px 28px;
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: all 0.15s;
+    background: var(--bg3); color: var(--text2); font-family: 'Bebas Neue', sans-serif; font-size: 22px;
+    letter-spacing: 0.1em; padding: 14px 28px; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
   }
   .btn-next:hover { border-color: var(--amber); color: var(--amber); }
-
-  /* ═══════════ RESULT PAGE ═══════════ */
-  #result { background: var(--bg); }
-
-  .result-main {
+ 
+  /* ═══════════ MISSION SUCCESS PAGE ═══════════ */
+  #missionSuccess {
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  #missionSuccess::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(99,153,34,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 20%, rgba(239,159,39,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+ 
+  #missionFail {
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  #missionFail::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 100%, rgba(226,75,74,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(226,75,74,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+ 
+  #finalResult {
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  #finalResult::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 100% 60% at 50% 100%, rgba(239,159,39,0.10) 0%, transparent 70%);
+    pointer-events: none;
+  }
+ 
+  /* SHARED DEBRIEF STYLES */
+  .debrief-wrap {
+    position: relative;
+    z-index: 10;
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem 2rem;
+    padding: 3rem 2rem 5rem;
     text-align: center;
   }
-
-  .result-outcome {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(60px, 12vw, 120px);
-    letter-spacing: 0.05em;
-    line-height: 1;
-    margin-bottom: 0.5rem;
+ 
+  .debrief-stamp {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    margin-bottom: 1.5rem;
+    padding: 6px 18px;
+    border: 1px solid currentColor;
+    display: inline-block;
+    animation: blink 2s step-end infinite;
   }
-  .result-outcome.success { color: var(--green); }
-  .result-outcome.fail { color: var(--red); }
-
-  .result-sub {
+  .debrief-stamp.success { color: var(--green); border-color: rgba(99,153,34,0.5); }
+  .debrief-stamp.fail    { color: var(--red);   border-color: rgba(226,75,74,0.5); }
+  .debrief-stamp.final   { color: var(--amber); border-color: rgba(239,159,39,0.5); }
+ 
+  .debrief-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(70px, 16vw, 160px);
+    letter-spacing: 0.04em;
+    line-height: 0.85;
+    margin-bottom: 1rem;
+  }
+  .debrief-headline.success { color: var(--green); text-shadow: 0 0 60px rgba(99,153,34,0.4); }
+  .debrief-headline.fail    { color: var(--red);   text-shadow: 0 0 60px rgba(226,75,74,0.4); }
+  .debrief-headline.final   { color: var(--amber); text-shadow: 0 0 60px rgba(239,159,39,0.4); }
+ 
+  .debrief-flavor {
     font-family: 'Share Tech Mono', monospace;
     font-size: 13px;
     letter-spacing: 0.15em;
     color: var(--text2);
     margin-bottom: 3rem;
+    max-width: 500px;
+    line-height: 1.8;
   }
-
-  .result-stats {
+ 
+  .debrief-grid {
     display: flex;
-    gap: 2rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border);
+    background: var(--border);
+    overflow: hidden;
   }
-
-  .result-stat {
+ 
+  .debrief-cell {
+    background: var(--bg2);
+    padding: 1.5rem 2.5rem;
     text-align: center;
-    min-width: 100px;
+    flex: 1;
+    min-width: 110px;
   }
-
-  .result-stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 52px;
-    line-height: 1;
-  }
-
-  .result-stat-label {
+  .debrief-cell + .debrief-cell { border-left: 1px solid var(--border); }
+ 
+  .debrief-cell-label {
     font-family: 'Share Tech Mono', monospace;
     font-size: 10px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.18em;
     color: var(--text2);
-    margin-top: 4px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
   }
-
-  .result-actions {
+ 
+  .debrief-cell-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+  }
+ 
+  /* objective progress bars */
+  .obj-progress-wrap {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2.5rem;
+  }
+ 
+  .obj-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 10px;
+  }
+ 
+  .obj-progress-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--text2);
+    min-width: 80px;
+    text-align: right;
+  }
+ 
+  .obj-progress-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+ 
+  .obj-progress-fill {
+    height: 100%;
+    transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .obj-progress-fill.missile { background: var(--red); }
+  .obj-progress-fill.supply  { background: var(--blue); }
+  .obj-progress-fill.full    { box-shadow: 0 0 8px currentColor; }
+ 
+  .obj-progress-frac {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    min-width: 50px;
+    text-align: left;
+  }
+  .obj-progress-frac.ok  { color: var(--green); }
+  .obj-progress-frac.bad { color: var(--red); }
+ 
+  /* star rating */
+  .star-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 2rem;
+    font-size: 40px;
+    filter: drop-shadow(0 0 8px rgba(239,159,39,0.5));
+  }
+ 
+  .star { opacity: 0.2; transition: opacity 0.3s; }
+  .star.lit { opacity: 1; animation: starPop 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes starPop {
+    0%   { transform: scale(0); }
+    60%  { transform: scale(1.3); }
+    100% { transform: scale(1); }
+  }
+ 
+  /* final rank badge */
+  .rank-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    padding: 10px 28px;
+    border: 2px solid;
+    margin-bottom: 2rem;
+    display: inline-block;
+  }
+  .rank-badge.S { color: var(--amber); border-color: var(--amber); background: rgba(239,159,39,0.08); box-shadow: 0 0 24px rgba(239,159,39,0.2); }
+  .rank-badge.A { color: var(--green);  border-color: var(--green);  background: rgba(99,153,34,0.08); }
+  .rank-badge.B { color: var(--blue);   border-color: var(--blue);   background: rgba(55,138,221,0.08); }
+  .rank-badge.C { color: var(--text2);  border-color: var(--border);  background: var(--bg3); }
+  .rank-badge.F { color: var(--red);    border-color: var(--red);     background: rgba(226,75,74,0.08); }
+ 
+  /* debrief action buttons */
+  .debrief-actions {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
     justify-content: center;
   }
-
+ 
+  /* ═══════════ OLD RESULT PAGE ═══════════ */
+  #result { background: var(--bg); }
+  .result-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem 2rem; text-align: center; }
+  .result-outcome { font-family: 'Bebas Neue', sans-serif; font-size: clamp(60px, 12vw, 120px); letter-spacing: 0.05em; line-height: 1; margin-bottom: 0.5rem; }
+  .result-outcome.success { color: var(--green); }
+  .result-outcome.fail { color: var(--red); }
+  .result-sub { font-family: 'Share Tech Mono', monospace; font-size: 13px; letter-spacing: 0.15em; color: var(--text2); margin-bottom: 3rem; }
+  .result-stats { display: flex; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; justify-content: center; }
+  .result-stat { text-align: center; min-width: 100px; }
+  .result-stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; }
+  .result-stat-label { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 0.15em; color: var(--text2); margin-top: 4px; }
+  .result-actions { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+ 
   /* FLASH OVERLAY */
-  .flash-overlay {
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 9000;
-    opacity: 0;
-    transition: opacity 0.1s;
-  }
+  .flash-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9000; opacity: 0; transition: opacity 0.1s; }
   .flash-overlay.flash-green { background: rgba(99,153,34,0.2); animation: flashAnim 0.3s ease-out; }
   .flash-overlay.flash-red { background: rgba(226,75,74,0.2); animation: flashAnim 0.3s ease-out; }
-  @keyframes flashAnim {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-  }
-
+  @keyframes flashAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
+ 
   /* RESPONSIVE */
   @media (max-width: 600px) {
     .stats-bar { gap: 1rem; }
@@ -794,97 +625,55 @@
     .objective-parts { flex-direction: column; }
     .game-hud { gap: 1rem; }
   }
-
+ 
   /* TICKER */
-  .ticker {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    padding: 6px 0;
-    overflow: hidden;
-    z-index: 50;
-  }
-  .ticker-inner {
-    display: flex;
-    gap: 4rem;
-    animation: ticker 30s linear infinite;
-    white-space: nowrap;
-  }
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  .ticker-item {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--text2);
-  }
+  .ticker { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); padding: 6px 0; overflow: hidden; z-index: 50; }
+  .ticker-inner { display: flex; gap: 4rem; animation: ticker 30s linear infinite; white-space: nowrap; }
+  @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .ticker-item { font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: var(--text2); }
   .ticker-item span { color: var(--amber); }
-
+ 
   /* Point popup */
-  .point-popup {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 80px;
-    color: var(--amber);
-    pointer-events: none;
-    z-index: 8000;
-    animation: popupAnim 0.8s ease-out forwards;
-    display: none;
-  }
-  @keyframes popupAnim {
-    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
-    100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; }
-  }
+  .point-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Bebas Neue', sans-serif; font-size: 80px; color: var(--amber); pointer-events: none; z-index: 8000; animation: popupAnim 0.8s ease-out forwards; display: none; }
+  @keyframes popupAnim { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%, -80%) scale(1.2); opacity: 0; } }
 </style>
 </head>
 <body>
-
+ 
+<canvas id="emberCanvas"></canvas>
+ 
 <div class="corner-mark tl"></div>
 <div class="corner-mark tr"></div>
 <div class="corner-mark bl"></div>
 <div class="corner-mark br"></div>
-
+ 
 <div class="flash-overlay" id="flashOverlay"></div>
 <div class="point-popup" id="pointPopup">+1</div>
-
+ 
 <!-- ═══ LANDING PAGE ═══ -->
 <div class="page active" id="landing">
   <div class="grid-bg"></div>
   <div class="radar-ring"></div>
   <div class="radar-ring"></div>
   <div class="radar-ring"></div>
-
+ 
   <div class="landing-inner">
     <div class="alert-tag">
       <div class="dot-blink"></div>
       MISSION CONTROL — SYSTEM ONLINE
     </div>
-
+ 
     <h1 class="game-title">WARZONE<br><span class="accent">ARCADE</span></h1>
-    <p class="subtitle">MECHATRONICS FINAL PROJECT — MISSION COMMAND SYSTEM</p>
-
+ 
     <div class="stats-bar">
       <div class="stat-item">
-        <div class="stat-num">30</div>
-        <div class="stat-label">SEC / MISSION</div>
+        <div class="stat-num">TIMED</div>
+        <div class="stat-label">MISSIONS</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
         <div class="stat-num">6</div>
-        <div class="stat-label">RANDOM MISSIONS</div>
-      </div>
-      <div class="stat-divider"></div>
-      <div class="stat-item">
-        <div class="stat-num">2</div>
-        <div class="stat-label">BALL TYPES</div>
+        <div class="stat-label">MISSIONS</div>
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
@@ -892,34 +681,32 @@
         <div class="stat-label">GLORY</div>
       </div>
     </div>
-
+ 
     <div class="btn-row">
-      <button class="btn-primary" onclick="showPage('game')">
-        ▶ START MISSION
-      </button>
-      <button class="btn-secondary" onclick="showPage('howto')">
-        HOW TO PLAY
-      </button>
+      <button class="btn-primary" onclick="showPage('game')">▶ START MISSION</button>
+      <button class="btn-secondary" onclick="showPage('howto')">HOW TO PLAY</button>
     </div>
   </div>
 </div>
-
+ 
 <!-- ═══ HOW IT WORKS PAGE ═══ -->
 <div class="page" id="howto">
   <div class="page-header">
     <button class="back-btn" onclick="showPage('landing')">← BACK</button>
     <div class="page-title">HOW TO PLAY</div>
   </div>
-
+ 
   <div class="howto-content">
     <div class="section-label">// BRIEFING</div>
     <div class="section-title">YOUR MISSION,<br>COMMANDER</div>
     <p class="intro-text">
-      You control the Warzone Arcade — a flywheel-powered launcher aimed at the target board.
-      Each mission gives you a specific number of missiles and supplies to deliver in 30 seconds.
-      Hit the sensors, rack up points, complete your objective. Simple. Brutal. Glorious.
+      Do you have what it in you to aid us in winning The War of all?<br>
+      Brave enough to fight against the terrors of the enemy?<br>
+      Strong enough to aid the weak?<br><br>
+      Then You ARE part of THE Republic's Army. You will be given a mission to either supply our allies or rain terror on the frontlines.<br>
+      The Republic COUNTS ON YOU 🫵🏻
     </p>
-
+ 
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-num">01</div>
@@ -935,18 +722,12 @@
       </div>
       <div class="step-card">
         <div class="step-num">03</div>
-        <span class="step-icon">🔄</span>
-        <div class="step-title">LIFT & SORT</div>
-        <p class="step-desc">The ball travels up the Archimedes screw lift (~30cm), then rolls down a slide into the automatic ball sorter.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">04</div>
         <span class="step-icon">✅</span>
         <div class="step-title">COMPLETE THE MISSION</div>
-        <p class="step-desc">Hit enough missiles (black balls) and supplies (white balls) before the 30-second timer runs out!</p>
+        <p class="step-desc">Hit enough missiles (black balls) and supplies (white balls) before the timer runs out!</p>
       </div>
     </div>
-
+ 
     <div class="section-label" style="margin-bottom: 1rem;">// BALL TYPES</div>
     <div class="ball-legend">
       <div class="ball-card">
@@ -964,13 +745,13 @@
         </div>
       </div>
     </div>
-
+ 
     <div style="text-align: center; margin-top: 2rem;">
       <button class="btn-primary" onclick="showPage('game')">▶ START MISSION</button>
     </div>
   </div>
 </div>
-
+ 
 <!-- ═══ GAME PAGE ═══ -->
 <div class="page" id="game">
   <div class="game-hud">
@@ -997,7 +778,13 @@
       </button>
     </div>
   </div>
-
+ 
+  <!-- BT Status bar -->
+  <div class="bt-status-bar" id="btStatusBar">
+    <span id="btStatusDot">◉</span>
+    <span id="btStatusText">BLUETOOTH CONNECTED</span>
+  </div>
+ 
   <div class="game-main">
     <div class="mission-card">
       <div class="mission-header">
@@ -1005,10 +792,8 @@
         <div class="mission-num" id="missionNum">MISSION 1 OF 6</div>
       </div>
       <div class="mission-body">
-        <div class="mission-objective" id="missionObjective">
-          AWAITING MISSION BRIEFING...
-        </div>
-
+        <div class="mission-objective" id="missionObjective">AWAITING MISSION BRIEFING...</div>
+ 
         <div class="objective-parts" id="objectiveParts">
           <div class="obj-part" id="missileObj">
             <div class="obj-ball missile"></div>
@@ -1025,16 +810,16 @@
             </div>
           </div>
         </div>
-
+ 
         <div class="timer-area">
-          <div class="timer-display" id="timerDisplay">00:30</div>
+          <div class="timer-display" id="timerDisplay">03:00</div>
           <div class="timer-bar-wrap">
             <div class="timer-bar-bg">
               <div class="timer-bar-fill" id="timerBar" style="width: 100%;"></div>
             </div>
           </div>
         </div>
-
+ 
         <div class="score-row">
           <div class="score-cell">
             <div class="score-cell-label">MISSILES HIT</div>
@@ -1049,7 +834,7 @@
             <div class="score-cell-val pts" id="totalPts">0</div>
           </div>
         </div>
-
+ 
         <div class="game-actions">
           <button class="btn-start" id="btnStart" onclick="startMission()">▶ BEGIN MISSION</button>
           <button class="btn-stop" id="btnStop" onclick="endMission(false)">■ ABORT</button>
@@ -1059,39 +844,169 @@
     </div>
   </div>
 </div>
-
-<!-- ═══ RESULT PAGE ═══ -->
-<div class="page" id="result">
+ 
+<!-- ═══ MISSION SUCCESS PAGE ═══ -->
+<div class="page" id="missionSuccess">
   <div class="page-header">
-    <div class="page-title">MISSION DEBRIEF</div>
+    <button class="back-btn" onclick="showPage('landing'); resetGame()">← MAIN MENU</button>
+    <div class="page-title" style="color: var(--green);">MISSION DEBRIEF — SUCCESS</div>
   </div>
-
-  <div class="result-main">
-    <div class="result-outcome" id="resultOutcome">MISSION COMPLETE</div>
-    <div class="result-sub" id="resultSub">ALL OBJECTIVES ACHIEVED — WELL DONE, COMMANDER</div>
-
-    <div class="result-stats">
-      <div class="result-stat">
-        <div class="result-stat-num" id="resMissiles" style="color: var(--red);">0</div>
-        <div class="result-stat-label">MISSILES</div>
+  <div class="debrief-wrap">
+    <div class="debrief-stamp success">◉ OBJECTIVE CLEARED</div>
+    <div class="debrief-headline success" id="sHeadline">MISSION<br>COMPLETE</div>
+    <div class="debrief-flavor" id="sFlavor">The operation was executed with precision.<br>The Republic salutes you, Commander.</div>
+ 
+    <div class="star-row" id="sStars">
+      <span class="star" id="star1">★</span>
+      <span class="star" id="star2">★</span>
+      <span class="star" id="star3">★</span>
+    </div>
+ 
+    <div class="obj-progress-wrap">
+      <div class="obj-progress-row" id="sMissileRow">
+        <div class="obj-progress-label">MISSILES</div>
+        <div class="obj-progress-track">
+          <div class="obj-progress-fill missile" id="sMissileBar" style="width:0%"></div>
+        </div>
+        <div class="obj-progress-frac" id="sMissileFrac">0/0</div>
       </div>
-      <div class="result-stat">
-        <div class="result-stat-num" id="resSupplies" style="color: var(--blue);">0</div>
-        <div class="result-stat-label">SUPPLIES</div>
-      </div>
-      <div class="result-stat">
-        <div class="result-stat-num" id="resTotal" style="color: var(--amber);">0</div>
-        <div class="result-stat-label">TOTAL SCORE</div>
+      <div class="obj-progress-row" id="sSupplyRow">
+        <div class="obj-progress-label">SUPPLIES</div>
+        <div class="obj-progress-track">
+          <div class="obj-progress-fill supply" id="sSupplyBar" style="width:0%"></div>
+        </div>
+        <div class="obj-progress-frac" id="sSupplyFrac">0/0</div>
       </div>
     </div>
-
-    <div class="result-actions">
-      <button class="btn-primary" onclick="showPage('game'); nextMission()" id="resBtnNext">NEXT MISSION →</button>
-      <button class="btn-secondary" onclick="showPage('landing'); resetGame()">← MAIN MENU</button>
+ 
+    <div class="debrief-grid" id="sGrid">
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">MISSILES</div>
+        <div class="debrief-cell-val" id="sMissiles" style="color:var(--red)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SUPPLIES</div>
+        <div class="debrief-cell-val" id="sSupplies" style="color:var(--blue)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SCORE</div>
+        <div class="debrief-cell-val" id="sScore" style="color:var(--amber)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">TIME LEFT</div>
+        <div class="debrief-cell-val" id="sTime" style="color:var(--green)">0s</div>
+      </div>
+    </div>
+ 
+    <div class="debrief-actions">
+      <button class="btn-primary" id="sBtnNext" onclick="proceedAfterMission()">NEXT MISSION →</button>
+      <button class="btn-secondary" onclick="showPage('landing'); resetGame()">← ABORT CAMPAIGN</button>
     </div>
   </div>
 </div>
-
+ 
+<!-- ═══ MISSION FAIL PAGE ═══ -->
+<div class="page" id="missionFail">
+  <div class="page-header">
+    <button class="back-btn" onclick="showPage('landing'); resetGame()">← MAIN MENU</button>
+    <div class="page-title" style="color: var(--red);">MISSION DEBRIEF — FAILED</div>
+  </div>
+  <div class="debrief-wrap">
+    <div class="debrief-stamp fail">✕ OBJECTIVE FAILED</div>
+    <div class="debrief-headline fail" id="fHeadline">MISSION<br>FAILED</div>
+    <div class="debrief-flavor" id="fFlavor">The operation did not meet its objectives.<br>Regroup and press forward, Commander. The Republic needs you.</div>
+ 
+    <div class="obj-progress-wrap">
+      <div class="obj-progress-row" id="fMissileRow">
+        <div class="obj-progress-label">MISSILES</div>
+        <div class="obj-progress-track">
+          <div class="obj-progress-fill missile" id="fMissileBar" style="width:0%"></div>
+        </div>
+        <div class="obj-progress-frac" id="fMissileFrac">0/0</div>
+      </div>
+      <div class="obj-progress-row" id="fSupplyRow">
+        <div class="obj-progress-label">SUPPLIES</div>
+        <div class="obj-progress-track">
+          <div class="obj-progress-fill supply" id="fSupplyBar" style="width:0%"></div>
+        </div>
+        <div class="obj-progress-frac" id="fSupplyFrac">0/0</div>
+      </div>
+    </div>
+ 
+    <div class="debrief-grid">
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">MISSILES</div>
+        <div class="debrief-cell-val" id="fMissiles" style="color:var(--red)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SUPPLIES</div>
+        <div class="debrief-cell-val" id="fSupplies" style="color:var(--blue)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SCORE</div>
+        <div class="debrief-cell-val" id="fScore" style="color:var(--amber)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SHORTFALL</div>
+        <div class="debrief-cell-val" id="fShortfall" style="color:var(--red)">0</div>
+      </div>
+    </div>
+ 
+    <div class="debrief-actions">
+      <button class="btn-primary" id="fBtnNext" onclick="proceedAfterMission()" style="background:var(--red); clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))">NEXT MISSION →</button>
+      <button class="btn-secondary" onclick="showPage('landing'); resetGame()">← ABORT CAMPAIGN</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- ═══ FINAL RESULT PAGE ═══ -->
+<div class="page" id="finalResult">
+  <div class="page-header">
+    <div class="page-title" style="color: var(--amber);">CAMPAIGN DEBRIEF</div>
+  </div>
+  <div class="debrief-wrap">
+    <div class="debrief-stamp final">◈ CAMPAIGN CONCLUDED</div>
+    <div class="debrief-headline final" id="frHeadline">CAMPAIGN<br>COMPLETE</div>
+    <div class="debrief-flavor" id="frFlavor">All six missions accounted for.<br>The Republic records your deeds in history, Commander.</div>
+ 
+    <div class="rank-badge" id="frRank">RANK: S</div>
+ 
+    <div class="debrief-grid" style="margin-bottom:2.5rem; max-width:600px; width:100%">
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">MISSIONS WON</div>
+        <div class="debrief-cell-val" id="frWins" style="color:var(--green)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">MISSIONS LOST</div>
+        <div class="debrief-cell-val" id="frLosses" style="color:var(--red)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">MISSILES</div>
+        <div class="debrief-cell-val" id="frMissiles" style="color:var(--red)">0</div>
+      </div>
+      <div class="debrief-cell">
+        <div class="debrief-cell-label">SUPPLIES</div>
+        <div class="debrief-cell-val" id="frSupplies" style="color:var(--blue)">0</div>
+      </div>
+    </div>
+ 
+    <div class="debrief-grid" style="margin-bottom:3rem; max-width:300px; width:100%">
+      <div class="debrief-cell" style="padding:2rem 3rem">
+        <div class="debrief-cell-label">FINAL SCORE</div>
+        <div class="debrief-cell-val" id="frTotal" style="color:var(--amber); font-size:64px">0</div>
+      </div>
+    </div>
+ 
+    <div class="debrief-actions">
+      <button class="btn-primary" onclick="showPage('landing'); resetGame()">▶ PLAY AGAIN</button>
+      <button class="btn-secondary" onclick="showPage('howto')">HOW TO PLAY</button>
+    </div>
+  </div>
+</div>
+ 
+<!-- kept for legacy reference but unused -->
+<div class="page" id="result" style="display:none!important"></div>
+ 
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner">
@@ -1101,7 +1016,6 @@
     <div class="ticker-item">BALL SORTER <span>// MISSILE / SUPPLY CLASSIFICATION</span></div>
     <div class="ticker-item">BLUETOOTH MODULE <span>// SIGNAL ACTIVE</span></div>
     <div class="ticker-item">ARDUINO JOYSTICK <span>// DIRECTIONAL CONTROL ENABLED</span></div>
-    <!-- repeat for seamless loop -->
     <div class="ticker-item">WARZONE ARCADE <span>// MECHATRONICS FINAL PROJECT</span></div>
     <div class="ticker-item">FLYWHEEL LAUNCHER ACTIVE <span>// PIEZO SENSORS ARMED</span></div>
     <div class="ticker-item">ARCHIMEDES SCREW LIFT <span>// 30cm VERTICAL ASCENT</span></div>
@@ -1110,319 +1024,645 @@
     <div class="ticker-item">ARDUINO JOYSTICK <span>// DIRECTIONAL CONTROL ENABLED</span></div>
   </div>
 </div>
-
+ 
 <script>
-  // ══════════ MISSIONS DATA ══════════
-  const MISSION_POOL = [
-    { title: "STRIKE PROTOCOL ALPHA", missiles: 5, supplies: 3 },
-    { title: "ALLIED RESUPPLY RUN", missiles: 2, supplies: 6 },
-    { title: "FULL ASSAULT MODE", missiles: 7, supplies: 1 },
-    { title: "BALANCED OFFENSIVE", missiles: 4, supplies: 4 },
-    { title: "MERCY MISSION", missiles: 1, supplies: 8 },
-    { title: "RAPID FIRE BLITZ", missiles: 6, supplies: 2 },
-    { title: "SURGICAL STRIKE", missiles: 3, supplies: 5 },
-    { title: "OVERWHELMING FORCE", missiles: 8, supplies: 0 },
-    { title: "PEACEKEEPING OP", missiles: 0, supplies: 7 },
-    { title: "DOUBLE DOWN", missiles: 5, supplies: 5 },
-  ];
-
-  const MISSION_DURATION = 30;
-
-  let state = {
-    missions: [],
-    currentMission: 0,
-    totalMissions: 6,
-    timer: null,
-    timeLeft: MISSION_DURATION,
-    running: false,
-    missileHit: 0,
-    supplyHit: 0,
-    totalScore: 0,
-    allMissileHit: 0,
-    allSupplyHit: 0,
-    allScore: 0,
-    btDevice: null,
-    btChar: null,
-    btConnected: false,
+// ══════════════════════════════════════
+// EMBER PARTICLE SYSTEM
+// ══════════════════════════════════════
+const canvas = document.getElementById('emberCanvas');
+const ctx = canvas.getContext('2d');
+ 
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+ 
+const EMBER_COUNT = 80;
+const embers = [];
+ 
+const EMBER_COLORS = [
+  [239, 159, 39],  // amber
+  [226, 75, 74],   // red
+  [255, 200, 80],  // yellow-orange
+  [255, 120, 50],  // orange
+];
+ 
+function createEmber(x, y) {
+  const color = EMBER_COLORS[Math.floor(Math.random() * EMBER_COLORS.length)];
+  return {
+    x: x !== undefined ? x : Math.random() * canvas.width,
+    y: y !== undefined ? y : canvas.height + 10,
+    vx: (Math.random() - 0.5) * 1.2,
+    vy: -(Math.random() * 2.5 + 0.8),
+    life: 1.0,
+    decay: Math.random() * 0.008 + 0.004,
+    size: Math.random() * 3 + 1,
+    color,
+    wobble: Math.random() * Math.PI * 2,
+    wobbleSpeed: Math.random() * 0.08 + 0.02,
+    glow: Math.random() > 0.6,
+    trail: [],
+    maxTrail: Math.floor(Math.random() * 4) + 2,
   };
-
-  function shuffle(arr) {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+}
+ 
+// Seed initial embers spread across the bottom
+for (let i = 0; i < EMBER_COUNT; i++) {
+  const e = createEmber();
+  e.y = Math.random() * canvas.height; // start spread out
+  e.life = Math.random();
+  embers.push(e);
+}
+ 
+function animateEmbers() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 
+  // Spawn new embers from multiple source points along bottom edges
+  if (Math.random() < 0.4) {
+    const spawnX = Math.random() < 0.5
+      ? Math.random() * canvas.width * 0.3           // left edge area
+      : canvas.width * 0.7 + Math.random() * canvas.width * 0.3; // right edge area
+    embers.push(createEmber(spawnX, canvas.height));
+  }
+  // Some random embers from bottom center too
+  if (Math.random() < 0.2) {
+    embers.push(createEmber(canvas.width * 0.3 + Math.random() * canvas.width * 0.4, canvas.height));
+  }
+ 
+  for (let i = embers.length - 1; i >= 0; i--) {
+    const e = embers[i];
+ 
+    // Save trail
+    e.trail.unshift({ x: e.x, y: e.y });
+    if (e.trail.length > e.maxTrail) e.trail.pop();
+ 
+    // Update
+    e.wobble += e.wobbleSpeed;
+    e.vx += Math.sin(e.wobble) * 0.05;
+    e.vy -= 0.01; // slight upward acceleration
+    e.vx *= 0.99;
+    e.x += e.vx;
+    e.y += e.vy;
+    e.life -= e.decay;
+ 
+    if (e.life <= 0 || e.y < -20) {
+      embers.splice(i, 1);
+      continue;
     }
-    return a;
-  }
-
-  function initMissions() {
-    state.missions = shuffle(MISSION_POOL).slice(0, state.totalMissions);
-    state.currentMission = 0;
-    state.allMissileHit = 0;
-    state.allSupplyHit = 0;
-    state.allScore = 0;
-  }
-
-  function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
-
-  function resetGame() {
-    clearInterval(state.timer);
-    state.running = false;
-    state.timeLeft = MISSION_DURATION;
-    state.missileHit = 0;
-    state.supplyHit = 0;
-    state.totalScore = 0;
-    updateTimerDisplay(MISSION_DURATION);
-    document.getElementById('btnStart').style.display = '';
-    document.getElementById('btnStop').style.display = 'none';
-    document.getElementById('btnNext').style.display = 'none';
-    initMissions();
-    loadMission(0);
-  }
-
-  function loadMission(idx) {
-    if (idx >= state.missions.length) {
-      showFinalResult();
-      return;
+ 
+    const alpha = e.life;
+    const [r, g, b] = e.color;
+ 
+    // Draw trail
+    for (let t = 0; t < e.trail.length; t++) {
+      const ta = alpha * (1 - t / e.trail.length) * 0.4;
+      const ts = e.size * (1 - t / e.trail.length) * 0.5;
+      ctx.beginPath();
+      ctx.arc(e.trail[t].x, e.trail[t].y, ts, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${ta})`;
+      ctx.fill();
     }
-    const m = state.missions[idx];
-    state.missileHit = 0;
-    state.supplyHit = 0;
-    state.totalScore = 0;
-    state.timeLeft = MISSION_DURATION;
-
-    document.getElementById('missionNum').textContent = `MISSION ${idx + 1} OF ${state.totalMissions}`;
-    document.getElementById('hudMission').textContent = `${idx + 1} / ${state.totalMissions}`;
-    document.getElementById('missionObjective').textContent = m.title;
-    document.getElementById('missileCount').textContent = m.missiles;
-    document.getElementById('supplyCount').textContent = m.supplies;
-    document.getElementById('missileHit').textContent = 0;
-    document.getElementById('supplyHit').textContent = 0;
-    document.getElementById('totalPts').textContent = 0;
-    document.getElementById('hudScore').textContent = state.allScore;
-    document.getElementById('hudStatus').textContent = 'STANDBY';
-    document.getElementById('hudStatus').style.color = 'var(--text2)';
-
-    updateTimerDisplay(MISSION_DURATION);
-    document.getElementById('timerBar').style.width = '100%';
-    document.getElementById('timerBar').classList.remove('warning');
-    document.getElementById('timerDisplay').classList.remove('warning');
-
-    document.getElementById('btnStart').style.display = '';
-    document.getElementById('btnStop').style.display = 'none';
-    document.getElementById('btnNext').style.display = 'none';
-
-    // Show/hide mission parts
-    document.getElementById('missileObj').style.display = m.missiles > 0 ? '' : 'none';
-    document.getElementById('supplyObj').style.display = m.supplies > 0 ? '' : 'none';
-  }
-
-  function updateTimerDisplay(sec) {
-    const m = String(Math.floor(sec / 60)).padStart(2, '0');
-    const s = String(sec % 60).padStart(2, '0');
-    document.getElementById('timerDisplay').textContent = `${m}:${s}`;
-  }
-
-  function startMission() {
-    if (state.running) return;
-    state.running = true;
-    state.timeLeft = MISSION_DURATION;
-
-    document.getElementById('btnStart').style.display = 'none';
-    document.getElementById('btnStop').style.display = '';
-    document.getElementById('hudStatus').textContent = 'ACTIVE';
-    document.getElementById('hudStatus').style.color = 'var(--green)';
-
-    state.timer = setInterval(() => {
-      state.timeLeft--;
-      updateTimerDisplay(state.timeLeft);
-
-      const pct = (state.timeLeft / MISSION_DURATION) * 100;
-      document.getElementById('timerBar').style.width = pct + '%';
-
-      if (state.timeLeft <= 10) {
-        document.getElementById('timerBar').classList.add('warning');
-        document.getElementById('timerDisplay').classList.add('warning');
-      }
-
-      if (state.timeLeft <= 0) {
-        endMission(true);
-      }
-    }, 1000);
-  }
-
-  function endMission(timeUp) {
-    if (!state.running && !timeUp) return;
-    clearInterval(state.timer);
-    state.running = false;
-
-    const m = state.missions[state.currentMission];
-    const missileGoal = m.missiles;
-    const supplyGoal = m.supplies;
-    const success = state.missileHit >= missileGoal && state.supplyHit >= supplyGoal;
-
-    state.allMissileHit += state.missileHit;
-    state.allSupplyHit += state.supplyHit;
-    state.allScore += state.totalScore;
-
-    document.getElementById('hudStatus').textContent = success ? 'SUCCESS' : 'FAILED';
-    document.getElementById('hudStatus').style.color = success ? 'var(--green)' : 'var(--red)';
-    document.getElementById('btnStop').style.display = 'none';
-
-    const isLast = state.currentMission >= state.totalMissions - 1;
-    if (isLast) {
-      document.getElementById('btnNext').textContent = 'VIEW RESULTS →';
-    } else {
-      document.getElementById('btnNext').textContent = 'NEXT MISSION →';
+ 
+    // Draw glow
+    if (e.glow) {
+      const grad = ctx.createRadialGradient(e.x, e.y, 0, e.x, e.y, e.size * 4);
+      grad.addColorStop(0, `rgba(${r},${g},${b},${alpha * 0.4})`);
+      grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.size * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
     }
-    document.getElementById('btnNext').style.display = '';
-
-    flash(success ? 'green' : 'red');
+ 
+    // Draw ember core
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.fill();
+ 
+    // Bright center
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.size * 0.4, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,220,${alpha * 0.8})`;
+    ctx.fill();
   }
-
-  function nextMission() {
-    const isLast = state.currentMission >= state.totalMissions - 1;
-    if (isLast) {
-      showFinalResult();
-      return;
-    }
-    state.currentMission++;
-    loadMission(state.currentMission);
+ 
+  // Keep count stable
+  while (embers.length < EMBER_COUNT) {
+    const e = createEmber();
+    e.life = Math.random() * 0.5 + 0.2;
+    embers.push(e);
   }
-
-  function showFinalResult() {
-    showPage('result');
-    const successRate = state.allScore > state.allMissileHit + state.allSupplyHit;
-
-    document.getElementById('resultOutcome').textContent = 'CAMPAIGN COMPLETE';
-    document.getElementById('resultOutcome').className = 'result-outcome success';
-    document.getElementById('resultSub').textContent = 'ALL MISSIONS COMPLETED — DEBRIEF IN PROGRESS';
-    document.getElementById('resMissiles').textContent = state.allMissileHit;
-    document.getElementById('resSupplies').textContent = state.allSupplyHit;
-    document.getElementById('resTotal').textContent = state.allScore;
-    document.getElementById('resBtnNext').style.display = 'none';
+ 
+  requestAnimationFrame(animateEmbers);
+}
+animateEmbers();
+ 
+// Burst embers on hit
+function burstEmbers(count = 30) {
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  for (let i = 0; i < count; i++) {
+    const e = createEmber(cx + (Math.random()-0.5)*200, cy + (Math.random()-0.5)*100);
+    e.vx = (Math.random() - 0.5) * 8;
+    e.vy = -(Math.random() * 6 + 2);
+    e.size = Math.random() * 5 + 2;
+    e.decay = 0.015 + Math.random() * 0.02;
+    e.life = 1.0;
+    e.glow = true;
+    embers.push(e);
   }
-
-  // Score update called when Bluetooth sends hit
-  function registerHit(type) {
-    if (!state.running) return;
-    const m = state.missions[state.currentMission];
-
-    if (type === 'missile') {
-      state.missileHit++;
-      document.getElementById('missileHit').textContent = state.missileHit;
-    } else {
-      state.supplyHit++;
-      document.getElementById('supplyHit').textContent = state.supplyHit;
-    }
-
-    state.totalScore++;
-    document.getElementById('totalPts').textContent = state.totalScore;
-    document.getElementById('hudScore').textContent = state.allScore + state.totalScore;
-
-    showPointPopup();
-
-    // Auto-complete if all objectives met
-    if (state.missileHit >= m.missiles && state.supplyHit >= m.supplies) {
-      endMission(false);
-    }
+}
+ 
+// ══════════════════════════════════════
+// MISSIONS DATA
+// ══════════════════════════════════════
+const MISSION_POOL = [
+  { title: "STRIKE PROTOCOL ALPHA", missiles: 3, supplies: 1 },
+  { title: "ALLIED RESUPPLY RUN", missiles: 2, supplies: 4 },
+  { title: "FULL ASSAULT MODE", missiles: 4, supplies: 0 },
+  { title: "BALANCED OFFENSIVE", missiles: 2, supplies: 2 },
+  { title: "MERCY MISSION", missiles: 0, supplies: 5 },
+  { title: "RAPID FIRE BLITZ", missiles: 3, supplies: 2 },
+  { title: "SURGICAL STRIKE", missiles: 3, supplies: 1 },
+  { title: "OVERWHELMING FORCE", missiles: 5, supplies: 0 },
+  { title: "PEACEKEEPING OP", missiles: 0, supplies: 4 },
+  { title: "DOUBLE DOWN", missiles: 4, supplies: 4 },
+];
+ 
+const MISSION_DURATION = 180;
+ 
+let state = {
+  missions: [],
+  currentMission: 0,
+  totalMissions: 6,
+  timer: null,
+  timeLeft: MISSION_DURATION,
+  running: false,
+  missileHit: 0,
+  supplyHit: 0,
+  totalScore: 0,
+  allMissileHit: 0,
+  allSupplyHit: 0,
+  allScore: 0,
+  btDevice: null,
+  btChar: null,
+  btConnected: false,
+  btScanning: false,
+};
+ 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
-
-  function showPointPopup() {
-    const el = document.getElementById('pointPopup');
-    el.style.display = 'block';
-    el.style.animation = 'none';
-    el.offsetHeight; // reflow
-    el.style.animation = 'popupAnim 0.8s ease-out forwards';
-    setTimeout(() => { el.style.display = 'none'; }, 800);
-  }
-
-  function flash(color) {
-    const el = document.getElementById('flashOverlay');
-    el.className = `flash-overlay flash-${color}`;
-    setTimeout(() => { el.className = 'flash-overlay'; }, 350);
-  }
-
-  // ══════════ BLUETOOTH ══════════
-  async function connectBluetooth() {
-    if (state.btConnected) {
-      disconnectBluetooth();
-      return;
-    }
-
-    try {
-      const device = await navigator.bluetooth.requestDevice({
-        acceptAllDevices: true,
-        optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
-      });
-
-      state.btDevice = device;
-      device.addEventListener('gattserverdisconnected', onBTDisconnected);
-
-      const server = await device.gatt.connect();
-      const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
-      const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
-
-      state.btChar = characteristic;
-      await characteristic.startNotifications();
-      characteristic.addEventListener('characteristicvaluechanged', onBTData);
-
-      state.btConnected = true;
-      updateBTUI(true);
-    } catch (err) {
-      console.log('BT error:', err);
-      if (err.name !== 'NotFoundError') {
-        alert('Bluetooth connection failed: ' + err.message);
-      }
-    }
-  }
-
-  function onBTData(event) {
-    const value = new TextDecoder().decode(event.target.value).trim();
-    if (value === 'M' || value === '1') registerHit('missile');
-    else if (value === 'S' || value === '2') registerHit('supply');
-  }
-
-  function onBTDisconnected() {
-    state.btConnected = false;
-    updateBTUI(false);
-  }
-
-  function disconnectBluetooth() {
-    if (state.btDevice && state.btDevice.gatt.connected) {
-      state.btDevice.gatt.disconnect();
-    }
-    state.btConnected = false;
-    updateBTUI(false);
-  }
-
-  function updateBTUI(connected) {
-    const btn = document.getElementById('btBtn');
-    const ind = document.getElementById('btIndicator');
-    const lbl = document.getElementById('btLabel');
-    if (connected) {
-      btn.classList.add('connected');
-      ind.classList.add('connected');
-      lbl.textContent = 'BT CONNECTED';
-    } else {
-      btn.classList.remove('connected');
-      ind.classList.remove('connected');
-      lbl.textContent = 'BT CONNECT';
-    }
-  }
-
-  // Keyboard shortcut for demo mode (M = missile hit, S = supply hit)
-  document.addEventListener('keydown', e => {
-    if (e.key === 'm' || e.key === 'M') registerHit('missile');
-    if (e.key === 's' || e.key === 'S') registerHit('supply');
-  });
-
-  // ══════════ INIT ══════════
+  return a;
+}
+ 
+function initMissions() {
+  state.missions = shuffle(MISSION_POOL).slice(0, state.totalMissions);
+  state.currentMission = 0;
+  state.allMissileHit = 0;
+  state.allSupplyHit = 0;
+  state.allScore = 0;
+  state.missionWins = 0;
+  state.missionLosses = 0;
+}
+ 
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+ 
+function resetGame() {
+  clearInterval(state.timer);
+  state.running = false;
+  state.timeLeft = MISSION_DURATION;
+  state.missileHit = 0;
+  state.supplyHit = 0;
+  state.totalScore = 0;
+  updateTimerDisplay(MISSION_DURATION);
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStop').style.display = 'none';
   initMissions();
   loadMission(0);
+}
+ 
+function loadMission(idx) {
+  if (idx >= state.missions.length) {
+    showFinalResult();
+    return;
+  }
+  const m = state.missions[idx];
+  state.missileHit = 0;
+  state.supplyHit = 0;
+  state.totalScore = 0;
+  state.timeLeft = MISSION_DURATION;
+ 
+  document.getElementById('missionNum').textContent = `MISSION ${idx + 1} OF ${state.totalMissions}`;
+  document.getElementById('hudMission').textContent = `${idx + 1} / ${state.totalMissions}`;
+  document.getElementById('missionObjective').textContent = m.title;
+  document.getElementById('missileCount').textContent = m.missiles;
+  document.getElementById('supplyCount').textContent = m.supplies;
+  document.getElementById('missileHit').textContent = 0;
+  document.getElementById('supplyHit').textContent = 0;
+  document.getElementById('totalPts').textContent = 0;
+  document.getElementById('hudScore').textContent = state.allScore;
+  document.getElementById('hudStatus').textContent = 'STANDBY';
+  document.getElementById('hudStatus').style.color = 'var(--text2)';
+ 
+  updateTimerDisplay(MISSION_DURATION);
+  document.getElementById('timerBar').style.width = '100%';
+  document.getElementById('timerBar').classList.remove('warning');
+  document.getElementById('timerDisplay').classList.remove('warning');
+ 
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnStop').style.display = 'none';
+ 
+  document.getElementById('missileObj').style.display = m.missiles > 0 ? '' : 'none';
+  document.getElementById('supplyObj').style.display = m.supplies > 0 ? '' : 'none';
+}
+ 
+function updateTimerDisplay(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+}
+ 
+function startMission() {
+  if (state.running) return;
+  state.running = true;
+  state.timeLeft = MISSION_DURATION;
+ 
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnStop').style.display = '';
+  document.getElementById('hudStatus').textContent = 'ACTIVE';
+  document.getElementById('hudStatus').style.color = 'var(--green)';
+ 
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay(state.timeLeft);
+ 
+    const pct = (state.timeLeft / MISSION_DURATION) * 100;
+    document.getElementById('timerBar').style.width = pct + '%';
+ 
+    if (state.timeLeft <= 10) {
+      document.getElementById('timerBar').classList.add('warning');
+      document.getElementById('timerDisplay').classList.add('warning');
+    }
+ 
+    if (state.timeLeft <= 0) endMission(true);
+  }, 1000);
+}
+ 
+function endMission(timeUp) {
+  if (!state.running && !timeUp) return;
+  clearInterval(state.timer);
+  state.running = false;
+ 
+  const m = state.missions[state.currentMission];
+  const success = state.missileHit >= m.missiles && state.supplyHit >= m.supplies;
+ 
+  // accumulate
+  state.allMissileHit += state.missileHit;
+  state.allSupplyHit  += state.supplyHit;
+  state.allScore      += state.totalScore;
+  if (success) state.missionWins = (state.missionWins || 0) + 1;
+  else         state.missionLosses = (state.missionLosses || 0) + 1;
+ 
+  // update HUD
+  document.getElementById('hudStatus').textContent = success ? 'SUCCESS' : 'FAILED';
+  document.getElementById('hudStatus').style.color = success ? 'var(--green)' : 'var(--red)';
+  document.getElementById('btnStop').style.display = 'none';
+ 
+  flash(success ? 'green' : 'red');
+ 
+  const isLast = state.currentMission >= state.totalMissions - 1;
+ 
+  if (success) {
+    burstEmbers(50);
+    showMissionSuccess(m, isLast);
+  } else {
+    showMissionFail(m, isLast);
+  }
+}
+ 
+// ── per-mission SUCCESS screen ──
+function showMissionSuccess(m, isLast) {
+  showPage('missionSuccess');
+ 
+  // headline variants based on time left
+  const timeBonus = state.timeLeft;
+  let headline = 'MISSION\nCOMPLETE';
+  let flavor = 'The operation was executed with precision.\nThe Republic salutes you, Commander.';
+  let stars = 1;
+ 
+  if (timeBonus > 120) { headline = 'FLAWLESS\nVICTORY';  flavor = 'Lightning fast. The enemy had no time to react.\nOutstanding work, Commander.'; stars = 3; }
+  else if (timeBonus > 60) { headline = 'MISSION\nSUCCESS'; flavor = 'Clean execution under pressure.\nWell done, Commander. Dismissed.'; stars = 2; }
+ 
+  document.getElementById('sHeadline').textContent = headline;
+  document.getElementById('sFlavor').textContent = flavor;
+ 
+  // stars with staggered animation
+  ['star1','star2','star3'].forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'star';
+    if (i < stars) {
+      setTimeout(() => { el.classList.add('lit'); }, 200 + i * 200);
+    }
+  });
+ 
+  // progress bars
+  setObjProgress('s', m, state.missileHit, state.supplyHit);
+ 
+  // stats
+  document.getElementById('sMissiles').textContent = state.missileHit;
+  document.getElementById('sSupplies').textContent = state.supplyHit;
+  document.getElementById('sScore').textContent    = state.totalScore;
+  document.getElementById('sTime').textContent     = timeBonus + 's';
+ 
+  // hide missile/supply rows if not part of mission
+  document.getElementById('sMissileRow').style.display = m.missiles > 0 ? '' : 'none';
+  document.getElementById('sSupplyRow').style.display  = m.supplies > 0 ? '' : 'none';
+ 
+  const btnNext = document.getElementById('sBtnNext');
+  btnNext.textContent = isLast ? 'VIEW FINAL RESULTS →' : 'NEXT MISSION →';
+}
+ 
+// ── per-mission FAIL screen ──
+function showMissionFail(m, isLast) {
+  showPage('missionFail');
+ 
+  const mShort = Math.max(0, m.missiles - state.missileHit);
+  const sShort = Math.max(0, m.supplies - state.supplyHit);
+  const shortfall = mShort + sShort;
+ 
+  let flavor = 'The operation did not meet its objectives.\nRegroup and press forward, Commander.';
+  if (shortfall === 1) flavor = 'So close — just one more hit would have done it.\nDon\'t let it happen again, Commander.';
+  else if (shortfall >= 5) flavor = 'Heavy losses. The front line is struggling.\nThe Republic expects better next time.';
+ 
+  document.getElementById('fHeadline').textContent = 'MISSION\nFAILED';
+  document.getElementById('fFlavor').textContent = flavor;
+ 
+  // progress bars
+  setObjProgress('f', m, state.missileHit, state.supplyHit);
+ 
+  document.getElementById('fMissiles').textContent = state.missileHit;
+  document.getElementById('fSupplies').textContent = state.supplyHit;
+  document.getElementById('fScore').textContent    = state.totalScore;
+  document.getElementById('fShortfall').textContent = '-' + shortfall;
+ 
+  document.getElementById('fMissileRow').style.display = m.missiles > 0 ? '' : 'none';
+  document.getElementById('fSupplyRow').style.display  = m.supplies > 0 ? '' : 'none';
+ 
+  const btnNext = document.getElementById('fBtnNext');
+  btnNext.textContent = isLast ? 'VIEW FINAL RESULTS →' : 'NEXT MISSION →';
+}
+ 
+// shared helper — fills progress bars for success/fail screens (prefix s or f)
+function setObjProgress(prefix, m, mHit, sHit) {
+  const mPct = m.missiles > 0 ? Math.min(100, (mHit / m.missiles) * 100) : 100;
+  const sPct = m.supplies > 0 ? Math.min(100, (sHit / m.supplies) * 100) : 100;
+ 
+  const mBar = document.getElementById(prefix + 'MissileBar');
+  const sBar = document.getElementById(prefix + 'SupplyBar');
+  const mFrac = document.getElementById(prefix + 'MissileFrac');
+  const sFrac = document.getElementById(prefix + 'SupplyFrac');
+ 
+  // animate bars in after a brief delay
+  setTimeout(() => {
+    mBar.style.width = mPct + '%';
+    sBar.style.width = sPct + '%';
+  }, 100);
+ 
+  mFrac.textContent = mHit + '/' + m.missiles;
+  sFrac.textContent = sHit + '/' + m.supplies;
+  mFrac.className = 'obj-progress-frac ' + (mHit >= m.missiles ? 'ok' : 'bad');
+  sFrac.className = 'obj-progress-frac ' + (sHit >= m.supplies ? 'ok' : 'bad');
+}
+ 
+// called from both success and fail screens
+function proceedAfterMission() {
+  const isLast = state.currentMission >= state.totalMissions - 1;
+  if (isLast) { showFinalResult(); return; }
+  state.currentMission++;
+  showPage('game');
+  loadMission(state.currentMission);
+}
+ 
+function nextMission() {
+  // legacy — kept for any inline calls
+  proceedAfterMission();
+}
+ 
+function showFinalResult() {
+  showPage('finalResult');
+ 
+  const wins   = state.missionWins   || 0;
+  const losses = state.missionLosses || 0;
+  const total  = state.allScore;
+ 
+  // Rank
+  let rank = 'C', rankClass = 'C';
+  if (losses === 0)          { rank = 'S — LEGENDARY';    rankClass = 'S'; }
+  else if (losses === 1)     { rank = 'A — ELITE';        rankClass = 'A'; }
+  else if (losses === 2)     { rank = 'B — VETERAN';      rankClass = 'B'; }
+  else if (losses <= 4)      { rank = 'C — SOLDIER';      rankClass = 'C'; }
+  else                       { rank = 'F — DISHONOURABLE'; rankClass = 'F'; }
+ 
+  let flavor = 'All six missions accounted for.\nThe Republic records your deeds in history, Commander.';
+  if (losses === 0) flavor = 'A perfect campaign. Not a single objective missed.\nYou are a legend of The Republic, Commander.';
+  else if (wins === 0) flavor = 'Not a single victory... The Republic is disappointed.\nReport for retraining immediately, Commander.';
+ 
+  document.getElementById('frHeadline').textContent = wins >= state.totalMissions / 2 ? 'CAMPAIGN\nVICTORY' : 'CAMPAIGN\nOVER';
+  document.getElementById('frHeadline').className = 'debrief-headline ' + (wins >= state.totalMissions / 2 ? 'final' : 'fail');
+  document.getElementById('frFlavor').textContent = flavor;
+ 
+  const rb = document.getElementById('frRank');
+  rb.textContent = 'RANK: ' + rank;
+  rb.className = 'rank-badge ' + rankClass;
+ 
+  document.getElementById('frWins').textContent    = wins;
+  document.getElementById('frLosses').textContent  = losses;
+  document.getElementById('frMissiles').textContent = state.allMissileHit;
+  document.getElementById('frSupplies').textContent = state.allSupplyHit;
+  document.getElementById('frTotal').textContent   = total;
+ 
+  burstEmbers(wins >= state.totalMissions / 2 ? 100 : 20);
+}
+ 
+function registerHit(type) {
+  if (!state.running) return;
+  const m = state.missions[state.currentMission];
+ 
+  if (type === 'missile') {
+    state.missileHit++;
+    document.getElementById('missileHit').textContent = state.missileHit;
+  } else {
+    state.supplyHit++;
+    document.getElementById('supplyHit').textContent = state.supplyHit;
+  }
+ 
+  state.totalScore++;
+  document.getElementById('totalPts').textContent = state.totalScore;
+  document.getElementById('hudScore').textContent = state.allScore + state.totalScore;
+ 
+  showPointPopup();
+  burstEmbers(15);
+ 
+  if (state.missileHit >= m.missiles && state.supplyHit >= m.supplies) {
+    endMission(false);
+  }
+}
+ 
+function showPointPopup() {
+  const el = document.getElementById('pointPopup');
+  el.style.display = 'block';
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'popupAnim 0.8s ease-out forwards';
+  setTimeout(() => { el.style.display = 'none'; }, 800);
+}
+ 
+function flash(color) {
+  const el = document.getElementById('flashOverlay');
+  el.className = `flash-overlay flash-${color}`;
+  setTimeout(() => { el.className = 'flash-overlay'; }, 350);
+}
+ 
+// ══════════════════════════════════════
+// IMPROVED BLUETOOTH
+// ══════════════════════════════════════
+function setBTState(s, msg) {
+  const btn = document.getElementById('btBtn');
+  const ind = document.getElementById('btIndicator');
+  const lbl = document.getElementById('btLabel');
+  const bar = document.getElementById('btStatusBar');
+  const barTxt = document.getElementById('btStatusText');
+ 
+  // Reset classes
+  btn.className = 'bt-btn';
+  ind.className = 'bt-indicator';
+  bar.className = 'bt-status-bar';
+ 
+  if (s === 'idle') {
+    lbl.textContent = 'BT CONNECT';
+    bar.classList.remove('show');
+  } else if (s === 'scanning') {
+    btn.classList.add('scanning');
+    ind.classList.add('scanning');
+    lbl.textContent = 'SCANNING...';
+    bar.classList.add('show', 'scanning');
+    barTxt.textContent = msg || 'SCANNING FOR DEVICE...';
+  } else if (s === 'connected') {
+    btn.classList.add('connected');
+    ind.classList.add('connected');
+    lbl.textContent = 'CONNECTED ✓';
+    bar.classList.add('show');
+    barTxt.textContent = msg || 'BLUETOOTH CONNECTED — SENSOR ACTIVE';
+  } else if (s === 'error') {
+    btn.classList.add('error');
+    ind.classList.add('error');
+    lbl.textContent = 'BT FAILED';
+    bar.classList.add('show', 'error');
+    barTxt.textContent = msg || 'CONNECTION FAILED — TAP TO RETRY';
+    setTimeout(() => { if (!state.btConnected) setBTState('idle'); }, 3000);
+  } else if (s === 'disconnected') {
+    lbl.textContent = 'BT CONNECT';
+    bar.classList.add('show', 'error');
+    barTxt.textContent = 'DEVICE DISCONNECTED — TAP TO RECONNECT';
+    setTimeout(() => { bar.classList.remove('show'); }, 4000);
+  }
+}
+ 
+async function connectBluetooth() {
+  if (state.btConnected) {
+    disconnectBluetooth();
+    return;
+  }
+  if (state.btScanning) return;
+ 
+  if (!navigator.bluetooth) {
+    setBTState('error', 'WEB BLUETOOTH NOT SUPPORTED — USE CHROME/EDGE');
+    return;
+  }
+ 
+  state.btScanning = true;
+  setBTState('scanning', 'SELECT YOUR HC-05/HC-06 MODULE...');
+ 
+  try {
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: ['0000ffe0-0000-1000-8000-00805f9b34fb']
+    });
+ 
+    setBTState('scanning', `CONNECTING TO ${device.name || 'DEVICE'}...`);
+    state.btDevice = device;
+    device.addEventListener('gattserverdisconnected', onBTDisconnected);
+ 
+    const server = await device.gatt.connect();
+    setBTState('scanning', 'ESTABLISHING SERVICE...');
+ 
+    const service = await server.getPrimaryService('0000ffe0-0000-1000-8000-00805f9b34fb');
+    const characteristic = await service.getCharacteristic('0000ffe1-0000-1000-8000-00805f9b34fb');
+ 
+    state.btChar = characteristic;
+    await characteristic.startNotifications();
+    characteristic.addEventListener('characteristicvaluechanged', onBTData);
+ 
+    state.btConnected = true;
+    state.btScanning = false;
+    setBTState('connected', `LINKED: ${device.name || 'ARDUINO MODULE'} — SENSOR ARMED`);
+ 
+  } catch (err) {
+    state.btScanning = false;
+    console.log('BT error:', err);
+    if (err.name === 'NotFoundError') {
+      setBTState('idle'); // User cancelled dialog — just go back to idle quietly
+    } else if (err.name === 'NetworkError') {
+      setBTState('error', 'GATT CONNECTION FAILED — DEVICE OUT OF RANGE?');
+    } else {
+      setBTState('error', `ERROR: ${err.message.toUpperCase().slice(0, 40)}`);
+    }
+  }
+}
+ 
+function onBTData(event) {
+  const value = new TextDecoder().decode(event.target.value).trim();
+  console.log('BT received:', value);
+  if (value === 'M' || value === '1') registerHit('missile');
+  else if (value === 'S' || value === '2') registerHit('supply');
+}
+ 
+function onBTDisconnected() {
+  state.btConnected = false;
+  state.btScanning = false;
+  state.btChar = null;
+  setBTState('disconnected');
+}
+ 
+function disconnectBluetooth() {
+  if (state.btDevice && state.btDevice.gatt.connected) {
+    state.btDevice.gatt.disconnect();
+  }
+  state.btConnected = false;
+  state.btScanning = false;
+  setBTState('idle');
+  document.getElementById('btStatusBar').classList.remove('show');
+}
+ 
+// Keyboard demo mode
+document.addEventListener('keydown', e => {
+  if (e.key === 'm' || e.key === 'M') registerHit('missile');
+  if (e.key === 's' || e.key === 'S') registerHit('supply');
+});
+ 
+// ══════════ INIT ══════════
+initMissions();
+loadMission(0);
 </script>
 </body>
 </html>
